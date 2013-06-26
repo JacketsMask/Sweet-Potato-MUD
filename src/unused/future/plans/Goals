@@ -1,0 +1,10 @@
+1.  Finish basic character statistics
+        Hitpoints current/max
+        Retrieve attack damage
+            Later derive from equipped weapon
+        Retrieve armor value
+            Later derive from equipped armor
+        Lower hitpoints
+        Check if dead
+            Requires a dead flag
+        

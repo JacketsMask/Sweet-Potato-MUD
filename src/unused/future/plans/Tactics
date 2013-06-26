@@ -1,0 +1,20 @@
+Tactics for determining combat targets for friendly or hostile actions.
+
+Party member:
+    Hitpoints below a certain threshold
+        Prefer lowest health?
+    Mana below a certain threshold
+    Afflicted by condition
+        Sleep
+        Poison
+        ...etc.
+Self:
+    Hitpoints below a certain threshold
+    Mana below a certain threshold
+Enemy:
+    Lowest health
+    Highest health
+    Most armor
+    Lowest armor
+    Melee
+    Ranged
