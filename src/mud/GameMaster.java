@@ -1,5 +1,7 @@
 package mud;
 
+// Inserting a comment here to test this shiz.
+
 import mud.geography.Area;
 import mud.geography.Room;
 import mud.network.server.AreaManager;
