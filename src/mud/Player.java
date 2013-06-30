@@ -1,7 +1,6 @@
 package mud;
 
 import mud.geography.Room;
-import mud.network.server.AreaManager;
 import java.util.Scanner;
 
 /**

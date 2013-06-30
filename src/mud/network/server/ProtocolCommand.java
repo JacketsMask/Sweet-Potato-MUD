@@ -12,7 +12,9 @@ public enum ProtocolCommand {
 
     //Commands from client to server
     //Communication
-    WHO, HELP, LOOK, TELL, SAY,
+    TELL, SAY,
     //Navigation
-    NORTH, EAST, WEST, SOUTH
+    NORTH, EAST, WEST, SOUTH,
+    //Other
+    WHO, HELP, LOOK,
 }

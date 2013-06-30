@@ -2,11 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package mud.network.server.chat;
+package mud.network.server.input.interpreter;
 
 import java.net.InetAddress;
 import java.util.HashMap;
-import mud.network.server.GameServer.Client;
+import java.util.Set;
+import mud.network.server.Client;
 import mud.network.server.Packet;
 import mud.network.server.ProtocolCommand;
 
@@ -18,11 +19,11 @@ import mud.network.server.ProtocolCommand;
  *
  * @author Jacob Dorman
  */
-public class ServerChatHelper {
+public class ChatCommandInterpreter {
 
     private HashMap<InetAddress, Client> clientMap;
 
-    public ServerChatHelper(HashMap<InetAddress, Client> clientMap) {
+    public ChatCommandInterpreter(HashMap<InetAddress, Client> clientMap) {
         this.clientMap = clientMap;
     }
 
@@ -39,9 +40,34 @@ public class ServerChatHelper {
         String arguments = packet.getArguments();
         //Check to see if the message is a tell
         if (command.equals(ProtocolCommand.TELL)) {
+            tellPlayer(sender, arguments);
         }
         if (command.equals(ProtocolCommand.SAY)) {
+            sendMesageToRoom(sender, arguments);
         }
         return false;
+    }
+    
+    private void tellPlayer(Client sender, String arguments) {
+        
+    }
+    
+    private void sendMesageToRoom(Client sender, String message) {
+        
+    }
+    
+    /**
+     * Sends the given string to all connected clients except the given client.
+     *
+     * @param message the message to send
+     */
+    private void sendToAllConnectedUsers(String message, mud.network.server.Client exception) {
+        Set<InetAddress> keySet = clientMap.keySet();
+        for (InetAddress inetAddress : keySet) {
+            mud.network.server.Client nextClient = clientMap.get(inetAddress);
+            if (nextClient != exception && nextClient.isOnline()) {
+                nextClient.sendMessage(message);
+            }
+        }
     }
 }

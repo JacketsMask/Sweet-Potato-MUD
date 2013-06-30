@@ -23,7 +23,7 @@ import javax.swing.text.DefaultCaret;
  *
  * @author Jacob Dorman
  */
-public class ChatClient {
+public class GameClient {
 
     private boolean connected;
     private JTextArea output;
@@ -43,7 +43,7 @@ public class ChatClient {
      * @throws UnknownHostException
      * @throws IOException 
      */
-    public ChatClient(String address, int port, JTextArea output, JTextField commandBar) throws UnknownHostException, IOException {
+    public GameClient(String address, int port, JTextArea output, JTextField commandBar) throws UnknownHostException, IOException {
         this.output = output;
         this.commandBar = commandBar;
         addWritingActionListener();
@@ -60,7 +60,7 @@ public class ChatClient {
      * @param output
      * @param commandBar
      */
-    public ChatClient(JTextArea output, JTextField commandBar) throws IOException {
+    public GameClient(JTextArea output, JTextField commandBar) throws IOException {
         this.output = output;
         this.commandBar = commandBar;
         addWritingActionListener();
@@ -140,7 +140,7 @@ public class ChatClient {
                         toServer.println(text);
                         cleanUpConnection();
                     } catch (IOException ex) {
-                        Logger.getLogger(ChatClient.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(GameClient.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 } //Otherwise, send command to the server
                 else if (text.equalsIgnoreCase("/clear")) {
@@ -193,7 +193,7 @@ public class ChatClient {
             try {
                 cleanUpConnection();
             } catch (IOException ex) {
-                Logger.getLogger(ChatClient.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(GameClient.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }

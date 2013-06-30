@@ -1,4 +1,4 @@
-package mud.network.server;
+package mud;
 
 
 // Making a small change.
