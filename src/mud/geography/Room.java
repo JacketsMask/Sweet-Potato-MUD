@@ -32,7 +32,7 @@ public class Room implements Serializable {
         description = "You're in a nondescript room.";
         players = new ArrayList<>();
     }
-    
+
     public void addPlayer(Player player) {
         players.add(player);
     }
@@ -65,24 +65,12 @@ public class Room implements Serializable {
         this.description = description;
     }
 
-    public Room getNorth() {
-        return north;
-    }
-
     public void setNorth(Room north) {
         this.north = north;
     }
 
-    public Room getEast() {
-        return east;
-    }
-
     public void setEast(Room east) {
         this.east = east;
-    }
-
-    public Room getSouth() {
-        return south;
     }
 
     public void setSouth(Room south) {
@@ -97,16 +85,8 @@ public class Room implements Serializable {
         this.west = west;
     }
 
-    public Room getUp() {
-        return up;
-    }
-
     public void setUp(Room up) {
         this.up = up;
-    }
-
-    public Room getDown() {
-        return down;
     }
 
     public void setDown(Room down) {
@@ -115,5 +95,35 @@ public class Room implements Serializable {
 
     public void removePlayer(Player player) {
         players.remove(player);
+    }
+
+    /**
+     * Returns whatever room is in the given direction, or null if there is no
+     * room there.
+     *
+     * @param direction
+     * @return the room, or null if there is no room
+     */
+    public Room getRoomInDirection(Direction direction) {
+        if (direction.equals(Direction.NORTH)) {
+            return north;
+        }
+        if (direction.equals(Direction.EAST)) {
+            return east;
+        }
+        if (direction.equals(Direction.SOUTH)) {
+            return south;
+        }
+        if (direction.equals(Direction.WEST)) {
+            return west;
+        }
+        if (direction.equals(Direction.UP)) {
+            return up;
+        }
+        if (direction.equals(Direction.DOWN)) {
+            return down;
+        }
+        return null;
+
     }
 }

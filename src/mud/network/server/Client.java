@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import mud.Player;
 import mud.network.server.input.interpreter.MasterInterpreter;
 import mud.network.server.log.ConsoleLog;
 
@@ -20,7 +21,7 @@ import mud.network.server.log.ConsoleLog;
  */
 public class Client {
 
-    private String name;
+    private Player player;
     private InetAddress address;
     private Socket client;
     private boolean online;
@@ -37,16 +38,19 @@ public class Client {
      * @param client
      * @throws IOException
      */
-    public Client(Socket client, InetAddress address, MasterInterpreter interpreter) throws IOException {
+    public Client(Socket client, InetAddress address, Player player, MasterInterpreter interpreter) throws IOException {
         this.online = true;
         this.client = client;
         this.address = address;
+        this.player = player;
         this.interpreter = interpreter;
-        //Default name is the address
-        this.name = address.toString();
         this.writer = new ClientWriter();
         this.reader = new ClientReader();
         startThreads();
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 
     /**
@@ -71,7 +75,7 @@ public class Client {
                 disconnectClient();
                 reader.fromClient.close();
                 writer.toClient.close();
-                System.out.println(ConsoleLog.log() + name + " has fallen into a trance.");
+                System.out.println(ConsoleLog.log() + player.getName() + " has fallen into a trance.");
             } catch (IOException ex) {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -88,18 +92,11 @@ public class Client {
         Set<InetAddress> keySet = clientList.keySet();
         for (InetAddress i : keySet) {
             Client client = clientList.get(i);
-            if (client.getName().equalsIgnoreCase(name)) {
+            if (client.getPlayer().getName().equalsIgnoreCase(name)) {
                 return client;
             }
         }
         return null;
-    }
-
-    /**
-     * @return the player's name
-     */
-    public String getName() {
-        return name;
     }
 
     /**
@@ -175,11 +172,11 @@ public class Client {
                 Packet packet;
                 try {
                     while ((packet = (Packet) fromClient.readObject()) != null) {
-                        interpreter.interpretInput(name, packet);
+                        interpreter.interpret(address, packet);
                     }
                     Thread.sleep(100);
                 } catch (NoSuchElementException | IllegalStateException | IOException | InterruptedException | ClassNotFoundException e) {
-                    System.out.println(ConsoleLog.log() + " " + name + " reader crashed.");
+                    System.out.println(ConsoleLog.log() + " " + player.getName() + " reader crashed.");
                     break;
                 }
             }

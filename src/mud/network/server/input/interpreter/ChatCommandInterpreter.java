@@ -19,43 +19,42 @@ import mud.network.server.ProtocolCommand;
  *
  * @author Jacob Dorman
  */
-public class ChatCommandInterpreter {
+public class ChatCommandInterpreter implements Interpretable {
 
     private HashMap<InetAddress, Client> clientMap;
 
     public ChatCommandInterpreter(HashMap<InetAddress, Client> clientMap) {
         this.clientMap = clientMap;
     }
-
     /**
      * Interprets the packet passed in, and takes action if this packet relates
      * to communication, then returns true. Otherwise this method returns false.
      *
+     * @param player the player that sent the command
      * @param packet the Packet sent by the Client
-     * @param sender the Client sending the packet
+     * @param args the arguments passed
      * @return true if the command is communication related, false otherwise
      */
-    public boolean interpretInput(Packet packet, Client sender) {
+    @Override
+    public boolean interpret(InetAddress sender, Packet packet) {
         ProtocolCommand command = packet.getCommand();
-        String arguments = packet.getArguments();
+        Object arguments = packet.getArguments();
         //Check to see if the message is a tell
         if (command.equals(ProtocolCommand.TELL)) {
-            tellPlayer(sender, arguments);
+            tellPlayer(clientMap.get(sender), arguments);
         }
         if (command.equals(ProtocolCommand.SAY)) {
-            sendMesageToRoom(sender, arguments);
+            sendMesageToRoom(clientMap.get(sender), arguments);
         }
         return false;
     }
-    
-    private void tellPlayer(Client sender, String arguments) {
-        
+
+    private void tellPlayer(Client sender, Object arguments) {
     }
-    
-    private void sendMesageToRoom(Client sender, String message) {
-        
+
+    private void sendMesageToRoom(Client sender, Object message) {
     }
-    
+
     /**
      * Sends the given string to all connected clients except the given client.
      *

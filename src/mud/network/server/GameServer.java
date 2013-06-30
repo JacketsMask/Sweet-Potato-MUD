@@ -1,6 +1,5 @@
 package mud.network.server;
 
-import mud.network.server.log.ConsoleLog;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -8,7 +7,9 @@ import java.net.Socket;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import mud.Player;
 import mud.network.server.input.interpreter.MasterInterpreter;
+import mud.network.server.log.ConsoleLog;
 
 /**
  * This is the top-level server implementation. Lower level features such as
@@ -47,7 +48,7 @@ public class GameServer implements Runnable {
         for (InetAddress s : keySet) {
             //Retrieve each client's name
             Client client = clientMap.get(s);
-            serverClients += client.getName();
+            serverClients += client.getPlayer().getName();
             //If the client is online, mark them as online
             if (clientMap.get(s).isOnline()) {
                 serverClients += " [Online]";
@@ -71,7 +72,7 @@ public class GameServer implements Runnable {
     private boolean isNameTaken(String name) {
         Set<InetAddress> keySet = clientMap.keySet();
         for (InetAddress i : keySet) {
-            if (clientMap.get(i).getName().equalsIgnoreCase(name)) {
+            if (clientMap.get(i).getPlayer().getName().equalsIgnoreCase(name)) {
                 return true;
             }
         }
@@ -99,7 +100,7 @@ public class GameServer implements Runnable {
                             + clientAddress);
                 } //Client hasn't connected before
                 else {
-                    client = new Client(newClient, clientAddress, interpreter);
+                    client = new Client(newClient, clientAddress, new Player("Nobody"), interpreter);
                     clientMap.put(clientAddress, client);
                     System.out.println(ConsoleLog.log() + "Player connected from "
                             + clientAddress);

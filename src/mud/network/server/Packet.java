@@ -8,7 +8,7 @@ package mud.network.server;
 public class Packet {
 
     private ProtocolCommand command;
-    private String arguments;
+    private Object arguments;
 
     /**
      * Create a new packet with the passed ProtocolCommand and arguments.
@@ -21,7 +21,7 @@ public class Packet {
         this.arguments = arguments;
     }
 
-    public String getArguments() {
+    public Object getArguments() {
         return arguments;
     }
 

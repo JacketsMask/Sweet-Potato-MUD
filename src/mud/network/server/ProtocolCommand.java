@@ -14,7 +14,7 @@ public enum ProtocolCommand {
     //Communication
     TELL, SAY,
     //Navigation
-    NORTH, EAST, WEST, SOUTH,
+    MOVE,
     //Other
     WHO, HELP, LOOK,
 }

@@ -6,6 +6,7 @@ package mud.network.server.input.interpreter;
 
 import java.net.InetAddress;
 import java.util.HashMap;
+import mud.Player;
 import mud.network.server.Client;
 import mud.network.server.Packet;
 
@@ -13,9 +14,9 @@ import mud.network.server.Packet;
  *
  * @author Japhez
  */
-public class MasterInterpreter {
+public class MasterInterpreter implements Interpretable {
 
-    HashMap<InetAddress, Client> clientMap;
+    private HashMap<InetAddress, Client> clientMap;
     private ChatCommandInterpreter chatHelper;
     private OtherCommandInterpreter otherHelper;
     private static final String PROTOCOL_COMMANDS = "Commands:"
@@ -31,7 +32,8 @@ public class MasterInterpreter {
         otherHelper = new OtherCommandInterpreter(clientMap);
     }
 
-    public boolean interpretInput(String sender, Packet packet) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    @Override
+    public boolean interpret(InetAddress sender, Packet packet) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
