@@ -19,7 +19,7 @@ import mud.network.server.log.ConsoleLog;
  * A client that that allows for reading and writing from the client socket.
  * This class and subclasses should be used for server/client interaction.
  */
-public class Client {
+public class ClientConnection {
 
     private Player player;
     private InetAddress address;
@@ -38,7 +38,7 @@ public class Client {
      * @param client
      * @throws IOException
      */
-    public Client(Socket client, InetAddress address, Player player, MasterInterpreter interpreter) throws IOException {
+    public ClientConnection(Socket client, InetAddress address, Player player, MasterInterpreter interpreter) throws IOException {
         this.online = true;
         this.client = client;
         this.address = address;
@@ -77,7 +77,7 @@ public class Client {
                 writer.toClient.close();
                 System.out.println(ConsoleLog.log() + player.getName() + " has fallen into a trance.");
             } catch (IOException ex) {
-                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -88,10 +88,10 @@ public class Client {
      * @param name the name to search for
      * @return the Client with the given name if they exist. Otherwise null.
      */
-    public static Client getClient(String name, HashMap<InetAddress, Client> clientList) {
+    public static ClientConnection getClient(String name, HashMap<InetAddress, ClientConnection> clientList) {
         Set<InetAddress> keySet = clientList.keySet();
         for (InetAddress i : keySet) {
-            Client client = clientList.get(i);
+            ClientConnection client = clientList.get(i);
             if (client.getPlayer().getName().equalsIgnoreCase(name)) {
                 return client;
             }

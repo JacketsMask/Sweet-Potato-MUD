@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import mud.GameMaster;
 import mud.Player;
 import mud.network.server.input.interpreter.MasterInterpreter;
 import mud.network.server.log.ConsoleLog;
@@ -22,9 +23,9 @@ import mud.network.server.log.ConsoleLog;
 public class GameServer implements Runnable {
 
     private ServerSocket serverSocket;
-    private HashMap<InetAddress, Client> clientMap;
+    private HashMap<InetAddress, ClientConnection> clientMap;
+    private GameMaster game;
     private MasterInterpreter interpreter;
-
 
     /**
      * Creates a new chat server operating at the passed port.
@@ -36,47 +37,8 @@ public class GameServer implements Runnable {
         System.out.println(ConsoleLog.log() + "Server starting on port " + port);
         serverSocket = new ServerSocket(port);
         clientMap = new HashMap<>();
+        game = new GameMaster();
         interpreter = new MasterInterpreter(clientMap);
-    }
-
-    /**
-     * @return a list of server clients that have connected to the server
-     */
-    private String getUserList() {
-        String serverClients = "Server clients:\n";
-        Set<InetAddress> keySet = clientMap.keySet();
-        for (InetAddress s : keySet) {
-            //Retrieve each client's name
-            Client client = clientMap.get(s);
-            serverClients += client.getPlayer().getName();
-            //If the client is online, mark them as online
-            if (clientMap.get(s).isOnline()) {
-                serverClients += " [Online]";
-            } else {
-                serverClients += " [Offline]";
-            }
-            serverClients += "\n";
-        }
-        //Remove the final newline character
-        serverClients = serverClients.substring(0, serverClients.length() - 1);
-        return serverClients;
-    }
-
-    /**
-     * Returns true if the passed name is a client that has connected to the
-     * server.
-     *
-     * @param name the name to check
-     * @return true if the name has been taken by a client
-     */
-    private boolean isNameTaken(String name) {
-        Set<InetAddress> keySet = clientMap.keySet();
-        for (InetAddress i : keySet) {
-            if (clientMap.get(i).getPlayer().getName().equalsIgnoreCase(name)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -91,7 +53,7 @@ public class GameServer implements Runnable {
                 //Each client stores their address, and uses it for their
                 //default name
                 InetAddress clientAddress = newClient.getInetAddress();
-                Client client;
+                ClientConnection client;
                 //Client has connected in the past, reconnect them
                 if (clientMap.containsKey(clientAddress)) {
                     client = clientMap.get(clientAddress);
@@ -100,7 +62,7 @@ public class GameServer implements Runnable {
                             + clientAddress);
                 } //Client hasn't connected before
                 else {
-                    client = new Client(newClient, clientAddress, new Player("Nobody"), interpreter);
+                    client = new ClientConnection(newClient, clientAddress, new Player("Temp"), interpreter);
                     clientMap.put(clientAddress, client);
                     System.out.println(ConsoleLog.log() + "Player connected from "
                             + clientAddress);

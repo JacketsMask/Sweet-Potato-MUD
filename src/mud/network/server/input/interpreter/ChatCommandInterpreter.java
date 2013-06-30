@@ -7,7 +7,7 @@ package mud.network.server.input.interpreter;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Set;
-import mud.network.server.Client;
+import mud.network.server.ClientConnection;
 import mud.network.server.Packet;
 import mud.network.server.ProtocolCommand;
 
@@ -21,9 +21,9 @@ import mud.network.server.ProtocolCommand;
  */
 public class ChatCommandInterpreter implements Interpretable {
 
-    private HashMap<InetAddress, Client> clientMap;
+    private HashMap<InetAddress, ClientConnection> clientMap;
 
-    public ChatCommandInterpreter(HashMap<InetAddress, Client> clientMap) {
+    public ChatCommandInterpreter(HashMap<InetAddress, ClientConnection> clientMap) {
         this.clientMap = clientMap;
     }
     /**
@@ -49,10 +49,10 @@ public class ChatCommandInterpreter implements Interpretable {
         return false;
     }
 
-    private void tellPlayer(Client sender, Object arguments) {
+    private void tellPlayer(ClientConnection sender, Object arguments) {
     }
 
-    private void sendMesageToRoom(Client sender, Object message) {
+    private void sendMesageToRoom(ClientConnection sender, Object message) {
     }
 
     /**
@@ -60,10 +60,10 @@ public class ChatCommandInterpreter implements Interpretable {
      *
      * @param message the message to send
      */
-    private void sendToAllConnectedUsers(String message, mud.network.server.Client exception) {
+    private void sendToAllConnectedUsers(String message, mud.network.server.ClientConnection exception) {
         Set<InetAddress> keySet = clientMap.keySet();
         for (InetAddress inetAddress : keySet) {
-            mud.network.server.Client nextClient = clientMap.get(inetAddress);
+            mud.network.server.ClientConnection nextClient = clientMap.get(inetAddress);
             if (nextClient != exception && nextClient.isOnline()) {
                 nextClient.sendMessage(message);
             }

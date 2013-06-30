@@ -9,7 +9,7 @@ import java.util.HashMap;
 import mud.Player;
 import mud.geography.Direction;
 import mud.geography.Room;
-import mud.network.server.Client;
+import mud.network.server.ClientConnection;
 import mud.network.server.Packet;
 import mud.network.server.ProtocolCommand;
 
@@ -19,9 +19,9 @@ import mud.network.server.ProtocolCommand;
  */
 public class NavigationCommandInterpreter implements Interpretable {
 
-    HashMap<InetAddress, Client> clientMap;
+    HashMap<InetAddress, ClientConnection> clientMap;
 
-    public NavigationCommandInterpreter(HashMap<InetAddress, Client> clientMap) {
+    public NavigationCommandInterpreter(HashMap<InetAddress, ClientConnection> clientMap) {
         this.clientMap = clientMap;
     }
 
@@ -46,7 +46,7 @@ public class NavigationCommandInterpreter implements Interpretable {
      * @param client
      * @param direction
      */
-    private void movePlayer(Client client, Direction direction) {
+    private void movePlayer(ClientConnection client, Direction direction) {
         Player player = client.getPlayer();
         Room currentRoom = player.getCurrentRoom();
         Room roomInDirection = currentRoom.getRoomInDirection(direction);

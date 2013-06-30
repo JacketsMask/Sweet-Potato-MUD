@@ -1,14 +1,11 @@
 package mud;
 
-
-// Making a small change.
-
+import file.FileManipulator;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import mud.geography.Area;
 import mud.geography.Room;
-import file.FileManipulator;
 
 /**
  * A room manager that holds a list of all the areas and rooms in the MUD.
@@ -17,27 +14,42 @@ import file.FileManipulator;
  *
  * @author Japhez
  */
-public class AreaManager implements Serializable {
+public final class AreaManager implements Serializable {
 
-    private ArrayList<Integer> availableAreaIDs;
+    private int areaIDCount;
+    private ArrayList<Integer> freeAreaIDs;
     //A master list of all areas in the MUD
     private HashMap<Integer, Area> masterAreaList;
-    private ArrayList<Integer> availableRoomIDs;
+    private int roomIDCount;
+    private ArrayList<Integer> freeRoomIDs;
     private Room respawnRoom;
+    private final String PATH = "/areas/";
+    private final String EXTENSION = ".area";
 
     public AreaManager() {
-        //Add 1000 unique room ids to be made available
-        availableRoomIDs = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            availableRoomIDs.add(i + 1);
-        }
-        availableAreaIDs = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            availableAreaIDs.add(i + 1);
-        }
+        areaIDCount = 1;
+        roomIDCount = 1;
+        freeRoomIDs = new ArrayList<>();
+        freeAreaIDs = new ArrayList<>();
         masterAreaList = new HashMap<>();
+        createStarterArea();
+
     }
 
+    /**
+     * Saves the state of the passed area to the area folder (use this to store
+     * the "default" state of an area).
+     *
+     * @param area the area to be saved
+     */
+    public void saveArea(Area area) {
+        FileManipulator.writeObject(area, GameMaster.MAIN_DATA_PATH + PATH, area.getName() + EXTENSION);
+    }
+
+    /**
+     * Creates a basic cross shaped area of 5 rooms to be used as a base for
+     * area design and expansion.
+     */
     public void createStarterArea() {
         //Create a new area with a new area ID
         Area testArea = new Area("Test Area", getUniqueAreaID());
@@ -73,28 +85,51 @@ public class AreaManager implements Serializable {
         testArea.addRoom(south);
         testArea.addRoom(west);
         //Save the area to a file
-        FileManipulator.writeObject(testArea, "/areas/", testArea.getName() + ".area");
+        saveArea(testArea);
         //Add the area to the master area list
         masterAreaList.put(getUniqueAreaID(), testArea);
     }
 
+    /**
+     * Sets the spawn room, where new players should start, and dead players
+     * should reappear at.
+     *
+     * @param respawnRoom the room to respawn in
+     */
     public void setRespawnRoom(Room respawnRoom) {
         this.respawnRoom = respawnRoom;
     }
 
+    /**
+     * @return the respawn room
+     */
     public Room getRespawnRoom() {
         return respawnRoom;
     }
 
+    /**
+     * @return an available unique room ID
+     */
     public int getUniqueRoomID() {
-        return availableRoomIDs.remove(0);
+        if (freeRoomIDs.isEmpty()) {
+            return roomIDCount++;
+        } else {
+            return freeRoomIDs.remove(0);
+        }
     }
 
+    /**
+     * @return an available unique area ID
+     */
     public int getUniqueAreaID() {
-        return availableAreaIDs.remove(0);
+        if (freeAreaIDs.isEmpty()) {
+            return areaIDCount++;
+        } else {
+            return freeAreaIDs.remove(0);
+        }
     }
 
     public static void main(String[] args) {
-        new AreaManager().createStarterArea();
+        
     }
 }
