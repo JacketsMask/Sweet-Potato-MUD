@@ -22,6 +22,8 @@ public class FileManipulator {
      * @param fileName
      */
     public static void writeObject(Object objectToWrite, String path, String fileName) {
+        //Create the path if it doesn't exist
+        new File(path).mkdirs();
         try {
             ObjectOutputStream oStream;
             FileOutputStream fileOut;

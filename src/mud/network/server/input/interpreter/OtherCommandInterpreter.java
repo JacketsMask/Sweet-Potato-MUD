@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Set;
 import mud.network.server.ClientConnection;
 import mud.network.server.Packet;
+import mud.network.server.ProtocolCommand;
+import mud.network.server.log.ConsoleLog;
 
 /**
  *
@@ -20,7 +22,20 @@ public class OtherCommandInterpreter implements Interpretable {
 
     @Override
     public boolean interpret(InetAddress sender, Packet packet) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        ClientConnection client = clientMap.get(sender);
+        ProtocolCommand command = packet.getCommand();
+        Object arguments = packet.getArguments();
+        //Check to see if the client is disconnecting
+        if (command.equals(ProtocolCommand.DISCONNECT)) {
+            System.out.println(ConsoleLog.log() + client.getPlayer().getName() + " has disconnected.");
+            return true;
+            //Check to see if the player is communicating with the server
+        } else if (command.equals(ProtocolCommand.TALK_TO_SERVER)) {
+            String message = (String) arguments;
+            System.out.println(ConsoleLog.log() + client.getPlayer().getName() + " talks to the server: " + "\"" + message + "\"");
+            client.sendMessage("I hear you.");
+        }
+        return false;
     }
 
     /**

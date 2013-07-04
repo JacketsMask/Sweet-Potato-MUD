@@ -16,5 +16,5 @@ public enum ProtocolCommand {
     //Navigation
     MOVE,
     //Other
-    WHO, HELP, LOOK,
+    WHO, HELP, LOOK, DISCONNECT, TALK_TO_SERVER
 }

@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -13,6 +14,8 @@ import java.util.logging.Logger;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.text.DefaultCaret;
+import mud.network.server.Packet;
+import mud.network.server.ProtocolCommand;
 
 /**
  * The client connection to the server. This is used to communicate information
@@ -20,6 +23,10 @@ import javax.swing.text.DefaultCaret;
  * exclusively using the client, as long as a connection to a server is
  * established (this would be the case if a friend connects to an existing
  * server).
+ *
+ * NOTE: Don't use System.out.print() unless just debugging. All output should
+ * go to the JTextArea. The reason for this is that the server will be printing
+ * to the console, and we don't need that kind of complication.
  *
  * @author Jacob Dorman
  */
@@ -31,17 +38,18 @@ public class GameClient {
     private Socket server;
     private ClientReader reader;
     private Thread readerThread;
-    private PrintWriter toServer;
+    private ObjectOutputStream out;
 
     /**
      * Creates a new ChatClient with the passed name. Attempts to connect to the
      * passed address and port.
+     *
      * @param address the address of the server
      * @param port the port of the server
-     * @param output
-     * @param commandBar
+     * @param output the output JTextArea
+     * @param commandBar the input JTextField
      * @throws UnknownHostException
-     * @throws IOException 
+     * @throws IOException
      */
     public GameClient(String address, int port, JTextArea output, JTextField commandBar) throws UnknownHostException, IOException {
         this.output = output;
@@ -49,14 +57,15 @@ public class GameClient {
         addWritingActionListener();
         this.server = new Socket(address, port);
         reader = new ClientReader();
-        toServer = new PrintWriter(server.getOutputStream(), true);
-        System.out.println("Connection established on " + address + ":" + port);
+        out = new ObjectOutputStream(server.getOutputStream());
+        output.append("Connection established on " + address + ":" + port);
         connected = true;
     }
 
     /**
      * Creates a new ChatClient with only the passed name, and allows the user
      * to connect manually later.
+     *
      * @param output
      * @param commandBar
      */
@@ -77,8 +86,7 @@ public class GameClient {
     public void connect(String address, int port) throws UnknownHostException, IOException {
         this.server = new Socket(address, port);
         reader = new ClientReader();
-        toServer = new PrintWriter(server.getOutputStream(), true);
-        System.out.println("Connection established on " + address + ":" + port);
+        out = new ObjectOutputStream(server.getOutputStream());
         connected = true;
         commandBar.setText("/help");
     }
@@ -126,7 +134,6 @@ public class GameClient {
                             String address = split[0];
                             int port = Integer.parseInt(split[1]);
                             output.append("\nAttempting to connect to " + address + ":" + port);
-                            System.out.println("Attempting to connect to " + address + ":" + port);
                             connect(address, port);
                         } catch (NumberFormatException | IOException ex) {
                             output.append("\nYou've failed to reconnect with reality.");
@@ -134,21 +141,34 @@ public class GameClient {
                     } else {
                         output.append("\nYou seem out of touch with reality... (use /connect address:port)");
                     }
-                } //Check to see if the user is disconnecting
-                else if (text.equalsIgnoreCase("/disconnect")) {
+                    //Check to see if the user is trying to talk to the server
+                } else if (text.length() > 8 && text.substring(0, 7).equalsIgnoreCase("/serve ")) {
+                    Packet packet = new Packet(ProtocolCommand.TALK_TO_SERVER, text.substring(7, text.length()));
                     try {
-                        toServer.println(text);
+                        out.writeObject(packet);
+                    } catch (IOException ex) {
+                        Logger.getLogger(GameClient.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } //Check to see if the user is disconnecting
+                else if (text.equalsIgnoreCase(
+                        "/disconnect")) {
+                    try {
+                        output.append("\nCome back soon...");
+                        Packet packet = new Packet(ProtocolCommand.DISCONNECT, null);
+                        out.writeObject(packet);
                         cleanUpConnection();
                     } catch (IOException ex) {
                         Logger.getLogger(GameClient.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                } //Otherwise, send command to the server
-                else if (text.equalsIgnoreCase("/clear")) {
+                } //Check to see if the user is clearing the screen
+                else if (text.equalsIgnoreCase(
+                        "/clear")) {
                     output.setText("");
                     DefaultCaret caret = (DefaultCaret) output.getCaret();
                     caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
                 } else {
-                    toServer.println(text);
+                    //Malformed input, no need to send it to the server
+                    output.append("\n\"" + text + "\" not recognized.");
                 }
             }
         });

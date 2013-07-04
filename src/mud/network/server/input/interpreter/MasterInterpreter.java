@@ -6,7 +6,6 @@ package mud.network.server.input.interpreter;
 
 import java.net.InetAddress;
 import java.util.HashMap;
-import mud.Player;
 import mud.network.server.ClientConnection;
 import mud.network.server.Packet;
 
@@ -34,6 +33,10 @@ public class MasterInterpreter implements Interpretable {
 
     @Override
     public boolean interpret(InetAddress sender, Packet packet) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //Check other commands
+        if (otherHelper.interpret(sender, packet)) {
+            return true;
+        }
+        return false;
     }
 }

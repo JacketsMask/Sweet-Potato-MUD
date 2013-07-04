@@ -1,11 +1,13 @@
 package mud.network.server;
 
+import java.io.Serializable;
+
 /**
  * Packets are used to communicate between a client and the server.
  *
  * @author Jacob Dorman
  */
-public class Packet {
+public class Packet implements Serializable {
 
     private ProtocolCommand command;
     private Object arguments;

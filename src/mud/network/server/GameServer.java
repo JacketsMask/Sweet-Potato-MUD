@@ -33,7 +33,7 @@ public class GameServer implements Runnable {
      * @param port the port to operate the server on
      * @throws IOException
      */
-    public GameServer(int port) throws IOException {
+    public GameServer(int port) throws IOException{
         System.out.println(ConsoleLog.log() + "Server starting on port " + port);
         serverSocket = new ServerSocket(port);
         clientMap = new HashMap<>();
