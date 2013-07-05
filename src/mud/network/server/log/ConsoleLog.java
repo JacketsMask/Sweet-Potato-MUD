@@ -7,7 +7,7 @@ import java.util.GregorianCalendar;
  * A class whose only purpose is to be used with its static log() method to
  * generate timestamps.
  *
- * @author Jacob Dorman
+ * @author Japhez
  */
 public abstract class ConsoleLog {
 

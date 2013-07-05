@@ -6,7 +6,7 @@ import javax.swing.JTextField;
 
 /**
  * The GUI for clients to connect to.
- * @author Jacob
+ * @author Japhez
  */
 public class ClientFrame extends javax.swing.JFrame {
 

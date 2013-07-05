@@ -6,7 +6,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
@@ -14,8 +13,6 @@ import java.util.logging.Logger;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.text.DefaultCaret;
-import mud.network.server.Packet;
-import mud.network.server.ProtocolCommand;
 
 /**
  * The client connection to the server. This is used to communicate information
@@ -28,7 +25,7 @@ import mud.network.server.ProtocolCommand;
  * go to the JTextArea. The reason for this is that the server will be printing
  * to the console, and we don't need that kind of complication.
  *
- * @author Jacob Dorman
+ * @author Japhez
  */
 public class GameClient {
 
@@ -141,34 +138,12 @@ public class GameClient {
                     } else {
                         output.append("\nYou seem out of touch with reality... (use /connect address:port)");
                     }
-                    //Check to see if the user is trying to talk to the server
-                } else if (text.length() > 8 && text.substring(0, 7).equalsIgnoreCase("/serve ")) {
-                    Packet packet = new Packet(ProtocolCommand.TALK_TO_SERVER, text.substring(7, text.length()));
-                    try {
-                        out.writeObject(packet);
-                    } catch (IOException ex) {
-                        Logger.getLogger(GameClient.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } //Check to see if the user is disconnecting
-                else if (text.equalsIgnoreCase(
-                        "/disconnect")) {
-                    try {
-                        output.append("\nCome back soon...");
-                        Packet packet = new Packet(ProtocolCommand.DISCONNECT, null);
-                        out.writeObject(packet);
-                        cleanUpConnection();
-                    } catch (IOException ex) {
-                        Logger.getLogger(GameClient.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } //Check to see if the user is clearing the screen
-                else if (text.equalsIgnoreCase(
-                        "/clear")) {
-                    output.setText("");
-                    DefaultCaret caret = (DefaultCaret) output.getCaret();
-                    caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
                 } else {
-                    //Malformed input, no need to send it to the server
-                    output.append("\n\"" + text + "\" not recognized.");
+                    try {
+                        out.writeUTF(text);
+                    } catch (IOException ex) {
+                        Logger.getLogger(GameClient.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
         });

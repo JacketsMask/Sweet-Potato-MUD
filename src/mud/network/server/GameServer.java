@@ -18,13 +18,13 @@ import mud.network.server.log.ConsoleLog;
  * level server interactions should be directly done here. (connecting,
  * disconnecting, etc.)
  *
- * @author Jacob Dorman
+ * @author Japhez
  */
 public class GameServer implements Runnable {
 
     private ServerSocket serverSocket;
-    private HashMap<InetAddress, ClientConnection> clientMap;
-    private GameMaster game;
+    private HashMap<InetAddress, Connection> clientMap;
+    private GameMaster gameMaster;
     private MasterInterpreter interpreter;
 
     /**
@@ -33,11 +33,11 @@ public class GameServer implements Runnable {
      * @param port the port to operate the server on
      * @throws IOException
      */
-    public GameServer(int port) throws IOException{
+    public GameServer(int port) throws IOException {
         System.out.println(ConsoleLog.log() + "Server starting on port " + port);
         serverSocket = new ServerSocket(port);
         clientMap = new HashMap<>();
-        game = new GameMaster();
+        gameMaster = new GameMaster();
         interpreter = new MasterInterpreter(clientMap);
     }
 
@@ -51,9 +51,10 @@ public class GameServer implements Runnable {
             try {
                 Socket newClient = serverSocket.accept();
                 //Each client stores their address, and uses it for their
-                //default name
                 InetAddress clientAddress = newClient.getInetAddress();
-                ClientConnection client;
+                Connection client;
+
+
                 //Client has connected in the past, reconnect them
                 if (clientMap.containsKey(clientAddress)) {
                     client = clientMap.get(clientAddress);
@@ -62,7 +63,7 @@ public class GameServer implements Runnable {
                             + clientAddress);
                 } //Client hasn't connected before
                 else {
-                    client = new ClientConnection(newClient, clientAddress, new Player("Temp"), interpreter);
+                    client = new Connection(newClient, clientAddress, new Player("Temp"), interpreter);
                     clientMap.put(clientAddress, client);
                     System.out.println(ConsoleLog.log() + "Player connected from "
                             + clientAddress);
@@ -70,6 +71,23 @@ public class GameServer implements Runnable {
             } catch (IOException ex) {
                 Logger.getLogger(GameServer.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
+    }
+
+    private void connect(Socket socket) {
+        try {
+            //Create a temporary (unlisted) character until info is validated
+            Connection client = new Connection(socket, socket.getInetAddress(), new Player("NoOne"), interpreter);
+            client.sendMessage("Please enter your character name, or new for a new character.");
+            //If new, prompt for name and password.
+            //If not new, validate character name and request password
+            //Enter password:
+            //If password is correct, link player data up and re-establish connection
+            //Add player to player's current room, or if null then respawn
+            //If password incorrect, allow one retry and then abort the connection 
+            //If password incorrect, allow one retry and then abort the connection
+        } catch (IOException ex) {
+            Logger.getLogger(GameServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

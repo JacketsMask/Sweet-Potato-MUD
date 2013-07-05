@@ -1,15 +1,12 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package mud.network.server.input.interpreter;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
-import mud.network.server.ClientConnection;
-import mud.network.server.Packet;
-import mud.network.server.ProtocolCommand;
+import mud.Player;
+import mud.geography.Room;
+import mud.network.server.Connection;
 
 /**
  * This ServerChatHelper contains methods used to facilitate communication
@@ -17,15 +14,16 @@ import mud.network.server.ProtocolCommand;
  * the GameServer class, and in turn will provide abstraction to make that class
  * more manageable.
  *
- * @author Jacob Dorman
+ * @author Japhez
  */
 public class ChatCommandInterpreter implements Interpretable {
 
-    private HashMap<InetAddress, ClientConnection> clientMap;
+    private HashMap<InetAddress, Connection> clientMap;
 
-    public ChatCommandInterpreter(HashMap<InetAddress, ClientConnection> clientMap) {
+    public ChatCommandInterpreter(HashMap<InetAddress, Connection> clientMap) {
         this.clientMap = clientMap;
     }
+
     /**
      * Interprets the packet passed in, and takes action if this packet relates
      * to communication, then returns true. Otherwise this method returns false.
@@ -36,23 +34,65 @@ public class ChatCommandInterpreter implements Interpretable {
      * @return true if the command is communication related, false otherwise
      */
     @Override
-    public boolean interpret(InetAddress sender, Packet packet) {
-        ProtocolCommand command = packet.getCommand();
-        Object arguments = packet.getArguments();
+    public boolean interpret(Connection sender, ParsedInput input) {
+        String firstWord = input.getFirstWord();
         //Check to see if the message is a tell
-        if (command.equals(ProtocolCommand.TELL)) {
-            tellPlayer(clientMap.get(sender), arguments);
+        if (firstWord.equalsIgnoreCase("tell")) {
+            String target = input.getWordAtIndex(1);
+            //Check to see if there is no target argument
+            if (target == null) {
+                sender.sendMessage("Tell who what?");
+                return true;
+                //Target argument is there
+            } else {
+                //Verify that target is valid
+                Connection receiver = Connection.getConnection(target, clientMap);
+                //Target is invalid
+                if (receiver == null) {
+                    sender.sendMessage("I can't seem to find that person.");
+                    return true;
+                    //Target is valid
+                } else {
+                    //Make sure that there's a message to send
+                    String message = input.getWordsStartingAtIndex(2);
+                    String targetName = receiver.getPlayer().getName();
+                    //No message to send
+                    if (message == null) {
+                        sender.sendMessage("What would you like to tell " + targetName + "?");
+                        return true;
+                        //Message to send
+                    } else {
+                        receiver.sendMessage(targetName + " tells you, \"" + message + "\"");
+                        sender.sendMessage("You tell " + targetName + ", " + "\"" + message + "\"");
+                        return true;
+                    }
+                }
+            }
         }
-        if (command.equals(ProtocolCommand.SAY)) {
-            sendMesageToRoom(clientMap.get(sender), arguments);
+        //Check to see if the player is trying to say something to the room
+        if (firstWord.equalsIgnoreCase("say")) {
+            String senderName = sender.getPlayer().getName();
+            //Check to make sure there's something to say
+            String message = input.getWordsStartingAtIndex(1);
+            //There is nothing to say
+            if (message == null) {
+                sender.sendMessage("Say what?");
+                //There is something to say
+            } else {
+                Room currentRoom = sender.getPlayer().getCurrentRoom();
+                ArrayList<Player> players = currentRoom.getPlayers();
+                for (Player p : players) {
+                    //Don't send message to sender
+                    if (p != sender.getPlayer()) {
+                        Connection.getConnection(p.getName(), clientMap).sendMessage(senderName + " says, \"" + message + "\"");
+                    }
+                }
+                //Send message to sender
+                sender.sendMessage("You say, \"" + message + "\"");
+                return true;
+            }
         }
         return false;
-    }
-
-    private void tellPlayer(ClientConnection sender, Object arguments) {
-    }
-
-    private void sendMesageToRoom(ClientConnection sender, Object message) {
     }
 
     /**
@@ -60,10 +100,10 @@ public class ChatCommandInterpreter implements Interpretable {
      *
      * @param message the message to send
      */
-    private void sendToAllConnectedUsers(String message, mud.network.server.ClientConnection exception) {
+    private void sendToAllConnectedUsers(String message, mud.network.server.Connection exception) {
         Set<InetAddress> keySet = clientMap.keySet();
         for (InetAddress inetAddress : keySet) {
-            mud.network.server.ClientConnection nextClient = clientMap.get(inetAddress);
+            mud.network.server.Connection nextClient = clientMap.get(inetAddress);
             if (nextClient != exception && nextClient.isOnline()) {
                 nextClient.sendMessage(message);
             }

@@ -65,6 +65,7 @@ public final class AreaManager implements Serializable {
         center.setEast(east);
         center.setSouth(south);
         center.setWest(west);
+        //Set the respawn room
         setRespawnRoom(center);
         //Set the name and exits for the northern room
         north.setName("North room.");

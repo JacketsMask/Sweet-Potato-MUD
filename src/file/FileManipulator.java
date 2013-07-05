@@ -10,7 +10,7 @@ import java.util.logging.Logger;
  * Any interaction with files should be done through this class's static
  * methods.   
  *
- * @author Jacob Dorman
+ * @author Japhez
  */
 public class FileManipulator {
 

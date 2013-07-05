@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import mud.Player;
 import mud.network.server.input.interpreter.Interpretable;
+import mud.network.server.input.interpreter.ParsedInput;
 import mud.network.server.log.ConsoleLog;
 
 /**
@@ -21,6 +22,7 @@ import mud.network.server.log.ConsoleLog;
  */
 public class Connection {
 
+    private final int SLEEP_DELAY = 100;
     private Player player;
     private InetAddress address;
     private Socket client;
@@ -45,7 +47,7 @@ public class Connection {
         this.player = player;
         this.interpreter = interpreter;
         this.writer = new ClientWriter();
-        this.reader = new ClientReader();
+        this.reader = new ClientReader(this);
         startThreads();
     }
 
@@ -91,12 +93,12 @@ public class Connection {
     }
 
     /**
-     * Retrieves the desired Client using the given name.
+     * Retrieves the desired Connection using the given name.
      *
      * @param name the name to search for
      * @return the Client with the given name if they exist. Otherwise null.
      */
-    public static Connection getClient(String name, HashMap<InetAddress, Connection> clientList) {
+    public static Connection getConnection(String name, HashMap<InetAddress, Connection> clientList) {
         Set<InetAddress> keySet = clientList.keySet();
         for (InetAddress i : keySet) {
             Connection client = clientList.get(i);
@@ -123,7 +125,7 @@ public class Connection {
         online = true;
         client = socket;
         writer = new ClientWriter();
-        reader = new ClientReader();
+        reader = new ClientReader(this);
         startThreads();
     }
 
@@ -159,6 +161,7 @@ public class Connection {
      */
     private class ClientReader extends Thread {
 
+        private Connection connection;
         private ObjectInputStream fromClient;
 
         /**
@@ -166,7 +169,8 @@ public class Connection {
          *
          * @throws IOException
          */
-        public ClientReader() throws IOException {
+        public ClientReader(Connection connection) throws IOException {
+            this.connection = connection;
             fromClient = new ObjectInputStream(client.getInputStream());
         }
 
@@ -177,13 +181,14 @@ public class Connection {
         @Override
         public synchronized void run() {
             while (!Thread.interrupted()) {
-                Packet packet;
+                String message;
                 try {
-                    while ((packet = (Packet) fromClient.readObject()) != null) {
-                        interpreter.interpret(address, packet);
+                    while ((message = fromClient.readUTF()) != null) {
+                        ParsedInput parsedInput = new ParsedInput(message);
+                        interpreter.interpret(connection, parsedInput);
                     }
-                    Thread.sleep(100);
-                } catch (NoSuchElementException | IllegalStateException | IOException | InterruptedException | ClassNotFoundException e) {
+                    Thread.sleep(SLEEP_DELAY);
+                } catch (NoSuchElementException | IllegalStateException | IOException | InterruptedException e) {
                     System.out.println(ConsoleLog.log() + " " + player.getName() + " reader crashed.");
                     break;
                 }
@@ -229,7 +234,7 @@ public class Connection {
                 }
                 //Sleep to prevent rediculous CPU usage costs, haha
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(SLEEP_DELAY);
                 } catch (InterruptedException ex) {
                     //In case the client disconnects
                     cleanUpConnection();

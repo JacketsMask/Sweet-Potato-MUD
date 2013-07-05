@@ -6,16 +6,18 @@ package mud.network.server.input.interpreter;
 
 import java.net.InetAddress;
 import java.util.HashMap;
-import mud.network.server.ClientConnection;
-import mud.network.server.Packet;
+import mud.network.server.Connection;
 
 /**
+ * An interpreter that should be used when a client is under normal conditions
+ * (connected, logged in, playing the game). Uses several sub-interpreters to
+ * attempt to properly act on input.
  *
  * @author Japhez
  */
 public class MasterInterpreter implements Interpretable {
 
-    private HashMap<InetAddress, ClientConnection> clientMap;
+    private HashMap<InetAddress, Connection> clientMap;
     private ChatCommandInterpreter chatHelper;
     private OtherCommandInterpreter otherHelper;
     private static final String PROTOCOL_COMMANDS = "Commands:"
@@ -25,16 +27,16 @@ public class MasterInterpreter implements Interpretable {
             + "\n/connect address:port"
             + "\n/disconnect (disconnect from the server)";
 
-    public MasterInterpreter(HashMap<InetAddress, ClientConnection> clientMap) {
+    public MasterInterpreter(HashMap<InetAddress, Connection> clientMap) {
         this.clientMap = clientMap;
         chatHelper = new ChatCommandInterpreter(clientMap);
         otherHelper = new OtherCommandInterpreter(clientMap);
     }
 
     @Override
-    public boolean interpret(InetAddress sender, Packet packet) {
+    public boolean interpret(Connection sender, ParsedInput input) {
         //Check other commands
-        if (otherHelper.interpret(sender, packet)) {
+        if (otherHelper.interpret(sender, input)) {
             return true;
         }
         return false;

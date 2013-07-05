@@ -3,9 +3,7 @@ package mud.network.server.input.interpreter;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Set;
-import mud.network.server.ClientConnection;
-import mud.network.server.Packet;
-import mud.network.server.ProtocolCommand;
+import mud.network.server.Connection;
 import mud.network.server.log.ConsoleLog;
 
 /**
@@ -14,26 +12,30 @@ import mud.network.server.log.ConsoleLog;
  */
 public class OtherCommandInterpreter implements Interpretable {
 
-    private HashMap<InetAddress, ClientConnection> clientMap;
+    private HashMap<InetAddress, Connection> clientMap;
 
-    public OtherCommandInterpreter(HashMap<InetAddress, ClientConnection> clientMap) {
+    public OtherCommandInterpreter(HashMap<InetAddress, Connection> clientMap) {
         this.clientMap = clientMap;
     }
 
     @Override
-    public boolean interpret(InetAddress sender, Packet packet) {
-        ClientConnection client = clientMap.get(sender);
-        ProtocolCommand command = packet.getCommand();
-        Object arguments = packet.getArguments();
+    public boolean interpret(Connection sender, ParsedInput input) {
+        String firstWord = input.getFirstWord();
         //Check to see if the client is disconnecting
-        if (command.equals(ProtocolCommand.DISCONNECT)) {
-            System.out.println(ConsoleLog.log() + client.getPlayer().getName() + " has disconnected.");
+        if (firstWord.equalsIgnoreCase("disconnect")) {
+            System.out.println(ConsoleLog.log() + sender.getPlayer().getName() + " has disconnected.");
             return true;
             //Check to see if the player is communicating with the server
-        } else if (command.equals(ProtocolCommand.TALK_TO_SERVER)) {
-            String message = (String) arguments;
-            System.out.println(ConsoleLog.log() + client.getPlayer().getName() + " talks to the server: " + "\"" + message + "\"");
-            client.sendMessage("I hear you.");
+        } else if (firstWord.equalsIgnoreCase("serve")) {
+            String message = input.getWordsStartingAtIndex(1);
+            if (message == null) {
+                sender.sendMessage("Why tell the server nothing?");
+                return true;
+            } else {
+                System.out.println(ConsoleLog.log() + sender.getPlayer().getName() + " talks to the server: " + "\"" + message + "\"");
+                sender.sendMessage("I hear you.");
+                return true;
+            }
         }
         return false;
     }
@@ -46,7 +48,7 @@ public class OtherCommandInterpreter implements Interpretable {
         Set<InetAddress> keySet = clientMap.keySet();
         for (InetAddress s : keySet) {
             //Retrieve each client's name
-            ClientConnection client = clientMap.get(s);
+            Connection client = clientMap.get(s);
             serverClients += client.getPlayer().getName();
             //If the client is online, mark them as online
             if (clientMap.get(s).isOnline()) {
