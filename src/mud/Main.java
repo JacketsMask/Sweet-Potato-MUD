@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import mud.network.client.ClientFrame;
 import mud.network.client.GameClient;
-import mud.network.server.Connection;
 import mud.network.server.GameServer;
 
 /**

@@ -2,7 +2,6 @@ package mud.geography;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import mud.Player;
 
 /**
