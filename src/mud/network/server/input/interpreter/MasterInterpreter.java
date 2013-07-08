@@ -6,6 +6,7 @@ package mud.network.server.input.interpreter;
 
 import java.net.InetAddress;
 import java.util.HashMap;
+import mud.GameMaster;
 import mud.network.server.Connection;
 
 /**
@@ -17,6 +18,7 @@ import mud.network.server.Connection;
  */
 public class MasterInterpreter implements Interpretable {
 
+    private GameMaster master;
     private HashMap<InetAddress, Connection> clientMap;
     private NavigationInterpreter navigationInterpreter;
     private ChatInterpreter chatInterpreter;
@@ -28,9 +30,10 @@ public class MasterInterpreter implements Interpretable {
             + "\n/connect address:port"
             + "\n/disconnect (disconnect from the server)";
 
-    public MasterInterpreter(HashMap<InetAddress, Connection> clientMap) {
+    public MasterInterpreter(HashMap<InetAddress, Connection> clientMap, GameMaster master) {
         this.clientMap = clientMap;
-        chatInterpreter = new ChatInterpreter(clientMap);
+        this.master = master;
+        chatInterpreter = new ChatInterpreter(clientMap, this.master);
         otherInterpreter = new OtherCommandInterpreter(clientMap);
     }
 
