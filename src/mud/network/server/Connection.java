@@ -185,7 +185,10 @@ public class Connection {
                 try {
                     while ((message = fromClient.readUTF()) != null) {
                         ParsedInput parsedInput = new ParsedInput(message);
-                        interpreter.interpret(connection, parsedInput);
+                        boolean interpreted = interpreter.interpret(connection, parsedInput);
+                        if (!interpreted) {
+                            sendMessage("I don't get your meaning.");
+                        }
                     }
                     Thread.sleep(SLEEP_DELAY);
                 } catch (NoSuchElementException | IllegalStateException | IOException | InterruptedException e) {
