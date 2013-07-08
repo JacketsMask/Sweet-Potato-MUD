@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import mud.GameMaster;
 import mud.Player;
 import mud.geography.Room;
 import mud.network.server.Connection;
@@ -19,9 +20,11 @@ import mud.network.server.Connection;
 public class ChatInterpreter implements Interpretable {
 
     private HashMap<InetAddress, Connection> clientMap;
+    private GameMaster master;
 
-    public ChatInterpreter(HashMap<InetAddress, Connection> clientMap) {
+    public ChatInterpreter(HashMap<InetAddress, Connection> clientMap, GameMaster master) {
         this.clientMap = clientMap;
+        this.master = master;
     }
 
     /**
@@ -46,7 +49,7 @@ public class ChatInterpreter implements Interpretable {
                 //Target argument is there
             } else {
                 //Verify that target is valid
-                Connection receiver = Connection.getConnection(target, clientMap);
+                Player receiver = master.getPlayer(target);
                 //Target is invalid
                 if (receiver == null) {
                     sender.sendMessage("I can't seem to find that person.");
@@ -55,14 +58,14 @@ public class ChatInterpreter implements Interpretable {
                 } else {
                     //Make sure that there's a message to send
                     String message = input.getWordsStartingAtIndex(2);
-                    String targetName = receiver.getPlayer().getName();
+                    String targetName = receiver.getName();
                     //No message to send
                     if (message == null) {
                         sender.sendMessage("What would you like to tell " + targetName + "?");
                         return true;
                         //Message to send
                     } else {
-                        receiver.sendMessage(targetName + " tells you, \"" + message + "\"");
+                        receiver.getConnection().sendMessage(targetName + " tells you, \"" + message + "\"");
                         sender.sendMessage("You tell " + targetName + ", " + "\"" + message + "\"");
                         return true;
                     }
@@ -85,7 +88,7 @@ public class ChatInterpreter implements Interpretable {
                 for (Player p : players) {
                     //Don't send message to sender
                     if (p != sender.getPlayer()) {
-                        Connection.getConnection(p.getName(), clientMap).sendMessage(senderName + " says, \"" + message + "\"");
+                        p.sendMessage(senderName + " says, \"" + message + "\"");
                     }
                 }
                 //Send message to sender
