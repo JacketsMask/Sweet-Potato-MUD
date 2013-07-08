@@ -1,8 +1,6 @@
 package mud.network.server;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -24,17 +22,22 @@ import mud.network.server.log.ConsoleLog;
  */
 public class GameServer implements Runnable {
 
+    public static final int DEFAULT_PORT = 1337;
     private ServerSocket serverSocket;
     private HashMap<InetAddress, Connection> clientMap; //The master client list that holds connection
     private GameMaster gameMaster;
+    private boolean localOnly;
 
     /**
      * Creates a new chat server operating at the passed port.
      *
      * @param port the port to operate the server on
+     * @param localOnly whether or not this server will only accept one local
+     * connection
      * @throws IOException
      */
-    public GameServer(int port) throws IOException {
+    public GameServer(int port, boolean localOnly) throws IOException {
+        this.localOnly = localOnly;
         System.out.println(ConsoleLog.log() + "Server starting on port " + port);
         serverSocket = new ServerSocket(port);
         clientMap = new HashMap<>();
@@ -53,6 +56,10 @@ public class GameServer implements Runnable {
                 connect(newClient);
                 System.out.println(ConsoleLog.log() + "Player connected from "
                         + newClient.getInetAddress());
+                //If the server is local only, only accept one connection
+                if (localOnly) {
+                    break;
+                }
             } catch (IOException ex) {
                 Logger.getLogger(GameServer.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -73,11 +80,5 @@ public class GameServer implements Runnable {
             return connection;
         }
         return connection;
-    }
-
-    public static void main(String[] args) throws IOException {
-        final int PORT = 1337;
-        GameServer server = new GameServer(PORT);
-        new Thread(server).start();
     }
 }
