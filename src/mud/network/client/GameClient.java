@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import mud.network.server.GameServer;
 
 /**
  * The client connection to the server. This is used to communicate information
@@ -29,13 +30,14 @@ import javax.swing.JTextField;
  */
 public class GameClient {
 
-    private boolean connected;
     private JTextArea output;
     private JTextField commandBar;
     private Socket server;
     private ClientReader reader;
     private Thread readerThread;
     private PrintWriter writer;
+    private ConnectionStep currentConnectionStep;
+    private ConnectionChoice connectionChoice;
 
     /**
      * Creates a new ChatClient with the passed name. Attempts to connect to the
@@ -57,7 +59,7 @@ public class GameClient {
         writer = new PrintWriter(server.getOutputStream(), true);
         reader = new ClientReader();
         output.append("Connection established on " + address + ":" + port);
-        connected = true;
+        currentConnectionStep = ConnectionStep.CONNECTED;
     }
 
     /**
@@ -71,8 +73,51 @@ public class GameClient {
         this.output = output;
         this.commandBar = commandBar;
         addWritingActionListener();
-        connected = false;
-        commandBar.setText("/connect address:port");
+        currentConnectionStep = ConnectionStep.DECIDING_CONNECTION_TYPE;
+        printConnectionMenu();
+    }
+
+    /**
+     * Prints the connection menu to the output box.
+     */
+    private void printConnectionMenu() {
+        output.append("How would you like to play?"
+                + "\n1. Play locally by yourself."
+                + "\n2. Host a game to play with friends."
+                + "\n3. Join a friend's game.");
+    }
+
+    /**
+     * Blocks until a decision is made for connecting to a server either locally
+     * (solo play), locally (hosting), or by remote.
+     *
+     * @return 1 for solo local, 2 for local hosting, or 3 for remote.
+     */
+    public ConnectionChoice getConnectionChoice() {
+        while (connectionChoice == null) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(GameClient.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return connectionChoice;
+    }
+
+    /**
+     * Represents the client's connection choice.
+     */
+    public enum ConnectionChoice {
+
+        LOCAL_SOLO, LOCAL_CO_OP, REMOTE;
+    }
+
+    /**
+     * An enumeration that holds a stage of the connection process.
+     */
+    public enum ConnectionStep {
+
+        DECIDING_CONNECTION_TYPE, WAITING_FOR_CONNECTION_INFO, CONNECTED, DISCONNECTED;
     }
 
     /**
@@ -81,12 +126,22 @@ public class GameClient {
      * @param address
      * @param port
      */
-    public void connect(String address, int port) throws UnknownHostException, IOException {
-        this.server = new Socket(address, port);
-        reader = new ClientReader();
-        writer = new PrintWriter(server.getOutputStream(), true);
-        connected = true;
-        commandBar.setText("/help");
+    public void connect(String address, int port) {
+        append("\nAttempting to connect to " + address + ":" + port + "...");
+        try {
+            this.server = new Socket(address, port);
+            reader = new ClientReader();
+            writer = new PrintWriter(server.getOutputStream(), true);
+            currentConnectionStep = ConnectionStep.CONNECTED;
+        } catch (UnknownHostException ex) {
+            append("\nUnable to establish connection.\n");
+            currentConnectionStep = ConnectionStep.WAITING_FOR_CONNECTION_INFO;
+            append("Use \"connect address:port\".");
+        } catch (IOException ex) {
+            append("\nUnable to establish connection.\n");
+            currentConnectionStep = ConnectionStep.WAITING_FOR_CONNECTION_INFO;
+            append("Use \"connect address:port\".");
+        }
     }
 
     /**
@@ -100,15 +155,34 @@ public class GameClient {
         readerThread.interrupt();
         reader.fromServer.close();
         server.close();
-        output.append("\nYou no longer feel connected by an unseen force...");
-        connected = false;
+        append("\nDisconnected from server.");
+        currentConnectionStep = ConnectionStep.DISCONNECTED;
     }
 
     /**
      * @return true if this client is currently connected to a server
      */
     public boolean isConnected() {
-        return connected;
+        return currentConnectionStep == ConnectionStep.CONNECTED;
+    }
+
+    /**
+     * Clears the contents of the output window.
+     */
+    public void clearOutputWindow() {
+        output.setText("");
+    }
+
+    /**
+     * Appends the passed text to the output window.
+     *
+     * @param text
+     */
+    public void append(String text) {
+        output.append(text);
+        if (output.getText().charAt(0) == '\n') {
+            output.setText(output.getText().substring(1, output.getText().length()));
+        }
     }
 
     /**
@@ -118,29 +192,72 @@ public class GameClient {
         commandBar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                //Retrieve the text from the commandBar
                 String text = commandBar.getText();
+                if (text == null) {
+                    return;
+                }
+                //Select the text for ease of typing next command
                 commandBar.selectAll();
-                //Otherwise attempt to send command to the server if connected
-                if (!connected) {
-                    //Check to see if the user is connecting
-                    if (text.contains("/connect ")) {
+                //Deciding connection type
+                if (currentConnectionStep.equals(ConnectionStep.DECIDING_CONNECTION_TYPE)) {
+                    switch (text) {
+                        //Playing locally
+                        case "1":
+                            clearOutputWindow();
+                            connectionChoice = ConnectionChoice.LOCAL_SOLO;
+                            connect("localhost", GameServer.DEFAULT_PORT);
+                            currentConnectionStep = ConnectionStep.CONNECTED;
+                            break;
+                        //Host a game to play with friends
+                        case "2":
+                            clearOutputWindow();
+                            connectionChoice = ConnectionChoice.LOCAL_CO_OP;
+                            connect("localhost", GameServer.DEFAULT_PORT);
+                            currentConnectionStep = ConnectionStep.CONNECTED;
+                            break;
+                        //Join a friend's game
+                        case "3":
+                            clearOutputWindow();
+                            connectionChoice = ConnectionChoice.REMOTE;
+                            append("Use \"connect address:port\".");
+                            currentConnectionStep = ConnectionStep.WAITING_FOR_CONNECTION_INFO;
+                            break;
+                    }
+                    //Waiting for connection input
+                } else if (currentConnectionStep.equals(ConnectionStep.WAITING_FOR_CONNECTION_INFO)) {
+                    if (text.contains("connect ")) {
+                        //Connect to the address and port
+                        String address = null;
+                        int port = 0;
                         try {
-                            //Connect to the address and port
-                            text = text.substring(9);
+                            text = text.substring(8);
                             text = text.trim();
                             String[] split = text.split(":");
-                            String address = split[0];
-                            int port = Integer.parseInt(split[1]);
-                            output.append("\nAttempting to connect to " + address + ":" + port);
-                            connect(address, port);
-                        } catch (NumberFormatException | IOException ex) {
-                            output.append("\nYou've failed to reconnect with reality.");
+                            address = split[0];
+                            port = Integer.parseInt(split[1]);
+                            connect(address, port); //Attempts to connect
+                        } catch (NumberFormatException ex) {
+                            append("\nThat doesn't make sense...");
+                            append("\nUse \"connect address:port\".");
+                            clearOutputWindow();
                         }
                     } else {
-                        output.append("\nYou seem out of touch with reality... (use /connect address:port)");
+                        append("\nUse \"connect address:port\".");
                     }
-                } else {
+                    //Connected
+                } else if (currentConnectionStep.equals(ConnectionStep.CONNECTED)) {
+                    //Check to see if the user is disconnecting
+                    if (text.equalsIgnoreCase("disconnect")) {
+                        currentConnectionStep = ConnectionStep.DISCONNECTED;
+                        append("\nYou have disconnected from the server.");
+                    }
                     writer.println(text);
+                    //Disconnected
+                } else if (currentConnectionStep.equals(ConnectionStep.DISCONNECTED)) {
+                    append("\nYou're currently disconnected.\n");
+                    printConnectionMenu();
+                    currentConnectionStep = ConnectionStep.WAITING_FOR_CONNECTION_INFO;
                 }
             }
         });
@@ -175,7 +292,7 @@ public class GameClient {
                 try {
                     if ((s = fromServer.readLine()) != null) {
                         //Display the server's message
-                        output.append("\n" + s);
+                        append("\n" + s);
                     }
                 } catch (IOException ex) {
                     break;
