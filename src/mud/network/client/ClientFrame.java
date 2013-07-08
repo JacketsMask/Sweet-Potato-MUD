@@ -51,7 +51,11 @@ public class ClientFrame extends javax.swing.JFrame {
         jTextArea1.setEditable(false);
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
+        jTextArea1.setWrapStyleWord(true);
+        jTextArea1.setMargin(new java.awt.Insets(4, 4, 4, 4));
         jScrollPane1.setViewportView(jTextArea1);
+
+        jTextField1.setMargin(new java.awt.Insets(4, 4, 4, 4));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
