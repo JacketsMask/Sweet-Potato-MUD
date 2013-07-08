@@ -25,6 +25,7 @@ public class Connection {
     private Player player; //A connection always has a player, even if it's a temporary one
     private InetAddress address;
     private Socket client;
+    private boolean connected;
     private ClientWriter writer;
     private ClientReader reader;
     private Thread writerThread;
@@ -41,9 +42,10 @@ public class Connection {
     public Connection(Socket client, InetAddress address, Player player, Interpretable interpreter) throws IOException {
         this.client = client;
         this.address = address;
+        connected = true;
         this.player = player;
         this.interpreter = interpreter;
-        this.writer = new ClientWriter(); 
+        this.writer = new ClientWriter();
         this.reader = new ClientReader(this);
         startThreads();
     }
@@ -76,35 +78,25 @@ public class Connection {
      * @throws IOException
      */
     public void cleanUpConnection() {
-        //Verify that the client is online before cleaning up (this prevents
-        //duplicate clean ups)
-        try {
-            disconnectClient();
-            reader.fromClient.close();
-            writer.toClient.close();
-            System.out.println(ConsoleLog.log() + player.getName() + " has fallen into a trance.");
-        } catch (IOException ex) {
-            Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
+        if (connected) {
+            try {
+                disconnectClient();
+                reader.fromClient.close();
+                writer.toClient.close();
+                System.out.println(ConsoleLog.log() + this + " disconnected.");
+                connected = false;
+            } catch (IOException ex) {
+                Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
     }
 
-//    /**
-//     * Retrieves the desired Connection using the given name.
-//     *
-//     * @param name the name to search for
-//     * @return the Client with the given name if they exist. Otherwise null.
-//     */
-//    public static Connection getConnection(String name, HashMap<InetAddress, Player> clientList) {
-//        Set<InetAddress> keySet = clientList.keySet();
-//        for (InetAddress i : keySet) {
-//            Connection client = clientList.get(i).getConnection();
-//            if (client.getPlayer().getName().equalsIgnoreCase(name)) {
-//                return client;
-//            }
-//        }
-//        return null;
-//    }
+    @Override
+    public String toString() {
+        return address.toString() + "(" + player.getName() + ")";
+    }
+
     /**
      * @return this client's Internet address
      */
