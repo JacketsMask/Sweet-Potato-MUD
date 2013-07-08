@@ -18,8 +18,9 @@ import mud.network.server.Connection;
 public class MasterInterpreter implements Interpretable {
 
     private HashMap<InetAddress, Connection> clientMap;
-    private ChatCommandInterpreter chatHelper;
-    private OtherCommandInterpreter otherHelper;
+    private NavigationInterpreter navigationInterpreter;
+    private ChatInterpreter chatInterpreter;
+    private OtherCommandInterpreter otherInterpreter;
     private static final String PROTOCOL_COMMANDS = "Commands:"
             + "\n/who (display all connected players)"
             + "\n/tell player_name message (send a personal message)"
@@ -29,14 +30,22 @@ public class MasterInterpreter implements Interpretable {
 
     public MasterInterpreter(HashMap<InetAddress, Connection> clientMap) {
         this.clientMap = clientMap;
-        chatHelper = new ChatCommandInterpreter(clientMap);
-        otherHelper = new OtherCommandInterpreter(clientMap);
+        chatInterpreter = new ChatInterpreter(clientMap);
+        otherInterpreter = new OtherCommandInterpreter(clientMap);
     }
 
     @Override
     public boolean interpret(Connection sender, ParsedInput input) {
+        //Check movement commands
+        if (navigationInterpreter.interpret(sender, input)) {
+            return true;
+        }
+        //Check chat commands
+        if (chatInterpreter.interpret(sender, input)) {
+            return true;
+        }
         //Check other commands
-        if (otherHelper.interpret(sender, input)) {
+        if (otherInterpreter.interpret(sender, input)) {
             return true;
         }
         return false;
