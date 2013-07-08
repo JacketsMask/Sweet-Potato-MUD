@@ -14,7 +14,7 @@ import mud.network.server.Connection;
 public class LoginInterpreter implements Interpretable {
 
     private HashMap<InetAddress, Connection> clientMap;
-    GameMaster master;
+    private GameMaster master;
     private LoginStage currentStage;
     private String suggestedName;
 
@@ -54,13 +54,13 @@ public class LoginInterpreter implements Interpretable {
                     return true;
                 }
                 if (suggestedName.length() > 8) {
-                    sender.sendMessage("That's quite the mouthfull.  Try something with less than 9 characters?");
+                    sender.sendMessage("That's quite the mouthful.  Try something with less than 9 characters?");
                     return true;
                 }
                 Player existingPlayer = master.getPlayer(suggestedName);
                 //Player name isn't yet taken
                 if (existingPlayer == null) {
-                    sender.sendMessage("I don't know that name, would you like to be " + suggestedName + "? (yes/no)");
+                    sender.sendMessage("I don't know that name, would you like to be " + suggestedName + "? (\"yes\"/\"no\")");
                     this.setCurrentStage(LoginStage.NAME_CREATION);
                     return true;
                     //Player name is taken
@@ -90,7 +90,7 @@ public class LoginInterpreter implements Interpretable {
                 setCurrentStage(LoginStage.NAME_SELECTION);
                 return true;
             } else {
-                sender.sendMessage("A simple yes or no will suffice, thank you");
+                sender.sendMessage("A simple \"yes\" or \"no\" will suffice, thank you.");
                 return true;
             }
         }
