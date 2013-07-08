@@ -8,6 +8,7 @@ import mud.network.client.GameClient.ConnectionChoice;
 import mud.network.server.GameServer;
 
 /**
+ * The main plain, brain.
  *
  * @author Japhez
  */
@@ -23,6 +24,13 @@ public class Main {
         new Thread(gameServer).start();
     }
 
+    /**
+     * Attempts to create and connect the client application, then starts a
+     * server and connects it if necessary.
+     *
+     * @throws UnknownHostException
+     * @throws IOException
+     */
     public static void connectClient() throws UnknownHostException, IOException {
         ClientFrame clientFrame = new ClientFrame();
         GameClient gameClient = new GameClient(clientFrame.getjTextArea1(), clientFrame.getjTextField1());
