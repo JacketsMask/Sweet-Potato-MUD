@@ -2,7 +2,6 @@ package mud;
 
 import mud.geography.Room;
 import mud.network.server.Connection;
-import mud.network.server.log.ConsoleLog;
 
 /**
  * A MUD player.
@@ -25,9 +24,6 @@ public class Player {
     }
 
     public Connection getConnection() {
-        if (connection == null) {
-            System.err.println(ConsoleLog.log() + name + " is attempting to passed a null Connection!");
-        }
         return connection;
     }
 
