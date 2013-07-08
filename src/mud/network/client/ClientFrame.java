@@ -3,9 +3,11 @@ package mud.network.client;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.text.DefaultCaret;
 
 /**
  * The GUI for clients to connect to.
+ *
  * @author Japhez
  */
 public class ClientFrame extends javax.swing.JFrame {
@@ -18,6 +20,8 @@ public class ClientFrame extends javax.swing.JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         setLocationByPlatform(true);
+        DefaultCaret caret = (DefaultCaret) jTextArea1.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
     }
 
     public JTextArea getjTextArea1() {

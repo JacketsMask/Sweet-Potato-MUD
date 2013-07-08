@@ -33,6 +33,7 @@ public class MasterInterpreter implements Interpretable {
     public MasterInterpreter(HashMap<InetAddress, Connection> clientMap, GameMaster master) {
         this.clientMap = clientMap;
         this.master = master;
+        navigationInterpreter = new NavigationInterpreter(clientMap);
         chatInterpreter = new ChatInterpreter(clientMap, this.master);
         otherInterpreter = new OtherCommandInterpreter(clientMap);
     }

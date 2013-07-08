@@ -1,13 +1,12 @@
 package mud.network.server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,10 +22,9 @@ import mud.network.server.log.ConsoleLog;
 public class Connection {
 
     private final int SLEEP_DELAY = 100;
-    private Player player;
+    private Player player; //A connection always has a player, even if it's a temporary one
     private InetAddress address;
     private Socket client;
-    private boolean online;
     private ClientWriter writer;
     private ClientReader reader;
     private Thread writerThread;
@@ -41,19 +39,19 @@ public class Connection {
      * @throws IOException
      */
     public Connection(Socket client, InetAddress address, Player player, Interpretable interpreter) throws IOException {
-        this.online = true;
         this.client = client;
         this.address = address;
         this.player = player;
         this.interpreter = interpreter;
-        this.writer = new ClientWriter();
+        this.writer = new ClientWriter(); 
         this.reader = new ClientReader(this);
         startThreads();
     }
 
     /**
      * Sets an input interpret for this client's input to be interpreted by.
-     * @param interpreter 
+     *
+     * @param interpreter
      */
     public void setInterpreter(Interpretable interpreter) {
         this.interpreter = interpreter;
@@ -80,35 +78,33 @@ public class Connection {
     public void cleanUpConnection() {
         //Verify that the client is online before cleaning up (this prevents
         //duplicate clean ups)
-        if (online) {
-            try {
-                disconnectClient();
-                reader.fromClient.close();
-                writer.toClient.close();
-                System.out.println(ConsoleLog.log() + player.getName() + " has fallen into a trance.");
-            } catch (IOException ex) {
-                Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        try {
+            disconnectClient();
+            reader.fromClient.close();
+            writer.toClient.close();
+            System.out.println(ConsoleLog.log() + player.getName() + " has fallen into a trance.");
+        } catch (IOException ex) {
+            Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
         }
+
     }
 
-    /**
-     * Retrieves the desired Connection using the given name.
-     *
-     * @param name the name to search for
-     * @return the Client with the given name if they exist. Otherwise null.
-     */
-    public static Connection getConnection(String name, HashMap<InetAddress, Connection> clientList) {
-        Set<InetAddress> keySet = clientList.keySet();
-        for (InetAddress i : keySet) {
-            Connection client = clientList.get(i);
-            if (client.getPlayer().getName().equalsIgnoreCase(name)) {
-                return client;
-            }
-        }
-        return null;
-    }
-
+//    /**
+//     * Retrieves the desired Connection using the given name.
+//     *
+//     * @param name the name to search for
+//     * @return the Client with the given name if they exist. Otherwise null.
+//     */
+//    public static Connection getConnection(String name, HashMap<InetAddress, Player> clientList) {
+//        Set<InetAddress> keySet = clientList.keySet();
+//        for (InetAddress i : keySet) {
+//            Connection client = clientList.get(i).getConnection();
+//            if (client.getPlayer().getName().equalsIgnoreCase(name)) {
+//                return client;
+//            }
+//        }
+//        return null;
+//    }
     /**
      * @return this client's Internet address
      */
@@ -117,33 +113,13 @@ public class Connection {
     }
 
     /**
-     * Reconnect this client using the given socket.
-     *
-     * @param socket the new connection the client established
-     */
-    public void reconnect(Socket socket) throws IOException {
-        online = true;
-        client = socket;
-        writer = new ClientWriter();
-        reader = new ClientReader(this);
-        startThreads();
-    }
-
-    /**
-     * @return true if the client is currently online
-     */
-    public boolean isOnline() {
-        return online;
-    }
-
-    /**
      * Starts the reading and writing threads for this client.
      */
     private void startThreads() {
-        writerThread = new Thread(writer);
-        writerThread.start();
         readerThread = new Thread(reader);
         readerThread.start();
+        writerThread = new Thread(writer);
+        writerThread.start();
     }
 
     /**
@@ -153,7 +129,6 @@ public class Connection {
     public void disconnectClient() {
         readerThread.interrupt();
         writerThread.interrupt();
-        online = false;
     }
 
     /**
@@ -162,7 +137,7 @@ public class Connection {
     private class ClientReader extends Thread {
 
         private Connection connection;
-        private ObjectInputStream fromClient;
+        private BufferedReader fromClient;
 
         /**
          * Creates a new ChatReader to receive input from the client.
@@ -171,19 +146,19 @@ public class Connection {
          */
         public ClientReader(Connection connection) throws IOException {
             this.connection = connection;
-            fromClient = new ObjectInputStream(client.getInputStream());
+            fromClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
         }
 
         /**
-         * Continually waits for input (Packet objects) from the client, and
-         * interprets them when they arrive.
+         * Continually waits for input from the client, and interprets them when
+         * they arrive.
          */
         @Override
         public synchronized void run() {
             while (!Thread.interrupted()) {
                 String message;
                 try {
-                    while ((message = fromClient.readUTF()) != null) {
+                    while ((message = fromClient.readLine()) != null) {
                         ParsedInput parsedInput = new ParsedInput(message);
                         boolean interpreted = interpreter.interpret(connection, parsedInput);
                         if (!interpreted) {
@@ -192,7 +167,7 @@ public class Connection {
                     }
                     Thread.sleep(SLEEP_DELAY);
                 } catch (NoSuchElementException | IllegalStateException | IOException | InterruptedException e) {
-                    System.out.println(ConsoleLog.log() + " " + player.getName() + " reader crashed.");
+                    System.out.println(ConsoleLog.log() + " " + connection.getClientAddress() + " reader crashed.");
                     break;
                 }
             }
@@ -232,7 +207,6 @@ public class Connection {
                 //If there's something in the queue, retrieve it and send it
                 if (!queue.isEmpty()) {
                     String poll = (String) queue.poll();
-                    //System.out.println(log + "Sending " + poll + " to '" + name + "'");
                     toClient.println(poll);
                 }
                 //Sleep to prevent rediculous CPU usage costs, haha

@@ -2,6 +2,7 @@ package mud;
 
 import file.FileManipulator;
 import java.util.ArrayList;
+import mud.geography.Room;
 
 /**
  * The game manager that stores area, and player data. This is the top-level
@@ -53,5 +54,41 @@ public class GameMaster {
      */
     public AreaManager getAreaManager() {
         return areaManager;
+    }
+
+    /**
+     * Returns the player with the passed name if they exist in the system.
+     * Otherwise returns null.
+     *
+     * @param name
+     * @return the player, or null
+     */
+    public Player getPlayer(String name) {
+        for (Player p : players) {
+            if (p.getName().equalsIgnoreCase(name)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Respawns the passed player and forces them to look at the room.
+     *
+     * @param player
+     */
+    public void respawnPlayer(Player player) {
+        Room respawnRoom = player.getRespawnRoom();
+        //See if the respawn point exists specifically for this player
+        //If it doesn't exist, use the area respawn room
+        if (respawnRoom == null) {
+            player.setRespawnRoom(areaManager.getRespawnRoom());
+            respawnRoom = player.getRespawnRoom();
+        }
+        if (respawnRoom == null) {
+            System.out.println("crap, respawn room is null somehow");
+        }
+        player.setCurrentRoom(respawnRoom);
+        player.look();
     }
 }

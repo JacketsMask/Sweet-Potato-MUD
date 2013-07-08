@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
@@ -34,7 +35,7 @@ public class GameClient {
     private Socket server;
     private ClientReader reader;
     private Thread readerThread;
-    private ObjectOutputStream out;
+    private PrintWriter writer;
 
     /**
      * Creates a new ChatClient with the passed name. Attempts to connect to the
@@ -52,8 +53,9 @@ public class GameClient {
         this.commandBar = commandBar;
         addWritingActionListener();
         this.server = new Socket(address, port);
+        server.getOutputStream().flush();
+        writer = new PrintWriter(server.getOutputStream(), true);
         reader = new ClientReader();
-        out = new ObjectOutputStream(server.getOutputStream());
         output.append("Connection established on " + address + ":" + port);
         connected = true;
     }
@@ -82,7 +84,7 @@ public class GameClient {
     public void connect(String address, int port) throws UnknownHostException, IOException {
         this.server = new Socket(address, port);
         reader = new ClientReader();
-        out = new ObjectOutputStream(server.getOutputStream());
+        writer = new PrintWriter(server.getOutputStream(), true);
         connected = true;
         commandBar.setText("/help");
     }
@@ -138,11 +140,7 @@ public class GameClient {
                         output.append("\nYou seem out of touch with reality... (use /connect address:port)");
                     }
                 } else {
-                    try {
-                        out.writeUTF(text);
-                    } catch (IOException ex) {
-                        Logger.getLogger(GameClient.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    writer.println(text);
                 }
             }
         });

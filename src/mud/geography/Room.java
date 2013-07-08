@@ -132,24 +132,24 @@ public class Room implements Serializable {
     public String getExits() {
         String exits = "";
         if (north != null) {
-            exits += "North | ";
+            exits += "| North | ";
         }
         if (east != null) {
-            exits += "East |";
+            exits += "| East | ";
         }
         if (south != null) {
-            exits += "South |";
+            exits += "| South | ";
         }
         if (west != null) {
-            exits += "West |";
+            exits += "| West | ";
         }
         if (up != null) {
-            exits += "Up |";
+            exits += "| Up | ";
         }
         if (down != null) {
-            exits += "Down |";
+            exits += "| Down | ";
         }
         //Remove the last pipe
-        return exits.substring(0, exits.length() - 2);
+        return exits.substring(0, exits.length() - 1);
     }
 }

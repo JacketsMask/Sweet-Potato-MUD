@@ -69,10 +69,9 @@ public class NavigationInterpreter implements Interpretable {
         Room currentRoom = player.getCurrentRoom();
         Room roomInDirection = currentRoom.getRoomInDirection(direction);
         if (roomInDirection != null) {
-            sender.sendMessage("You move" + direction + ".");
-            currentRoom.removePlayer(player); //Remove the player from the old room
+            sender.sendMessage("You move " + direction + ".");
             player.setCurrentRoom(roomInDirection); //Move the player reference
-            player.getCurrentRoom().addPlayer(player); //Add the player to the list in the new room
+            player.look();
         } else {
             sender.sendMessage("You cannot move in that direction.");
         }

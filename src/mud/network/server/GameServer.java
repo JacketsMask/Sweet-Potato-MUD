@@ -1,6 +1,8 @@
 package mud.network.server;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -9,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import mud.GameMaster;
 import mud.Player;
-import mud.network.server.input.interpreter.MasterInterpreter;
+import mud.network.server.input.interpreter.LoginInterpreter;
 import mud.network.server.log.ConsoleLog;
 
 /**
@@ -23,9 +25,8 @@ import mud.network.server.log.ConsoleLog;
 public class GameServer implements Runnable {
 
     private ServerSocket serverSocket;
-    private HashMap<InetAddress, Connection> clientMap;
+    private HashMap<InetAddress, Connection> clientMap; //The master client list that holds connection
     private GameMaster gameMaster;
-    private MasterInterpreter interpreter;
 
     /**
      * Creates a new chat server operating at the passed port.
@@ -38,7 +39,6 @@ public class GameServer implements Runnable {
         serverSocket = new ServerSocket(port);
         clientMap = new HashMap<>();
         gameMaster = new GameMaster();
-        interpreter = new MasterInterpreter(clientMap);
     }
 
     /**
@@ -50,45 +50,29 @@ public class GameServer implements Runnable {
         while (!Thread.interrupted()) {
             try {
                 Socket newClient = serverSocket.accept();
-                //Each client stores their address, and uses it for their
-                InetAddress clientAddress = newClient.getInetAddress();
-                Connection client;
-
-
-                //Client has connected in the past, reconnect them
-                if (clientMap.containsKey(clientAddress)) {
-                    client = clientMap.get(clientAddress);
-                    client.reconnect(newClient);
-                    System.out.println(ConsoleLog.log() + "Player reconnected from "
-                            + clientAddress);
-                } //Client hasn't connected before
-                else {
-                    client = new Connection(newClient, clientAddress, new Player("Temp"), interpreter);
-                    clientMap.put(clientAddress, client);
-                    System.out.println(ConsoleLog.log() + "Player connected from "
-                            + clientAddress);
-                }
+                connect(newClient);
+                System.out.println(ConsoleLog.log() + "Player connected from "
+                        + newClient.getInetAddress());
             } catch (IOException ex) {
                 Logger.getLogger(GameServer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
 
-    private void connect(Socket socket) {
+    private Connection connect(Socket socket) {
+        Connection connection = null;
         try {
             //Create a temporary (unlisted) character until info is validated
-            Connection client = new Connection(socket, socket.getInetAddress(), new Player("NoOne"), interpreter);
-            client.sendMessage("Please enter your character name, or new for a new character.");
-            //If new, prompt for name and password.
-            //If not new, validate character name and request password
-            //Enter password:
-            //If password is correct, link player data up and re-establish connection
-            //Add player to player's current room, or if null then respawn
-            //If password incorrect, allow one retry and then abort the connection 
-            //If password incorrect, allow one retry and then abort the connection
+            Player player = new Player("NoOne");
+            connection = new Connection(socket, socket.getInetAddress(), player, new LoginInterpreter(clientMap, gameMaster));
+            //The player stores a reference to their current connection for convenience
+            player.setConnection(connection);
+            connection.sendMessage("Please enter your character name.");
         } catch (IOException ex) {
             Logger.getLogger(GameServer.class.getName()).log(Level.SEVERE, null, ex);
+            return connection;
         }
+        return connection;
     }
 
     public static void main(String[] args) throws IOException {

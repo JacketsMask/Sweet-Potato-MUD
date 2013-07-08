@@ -108,7 +108,7 @@ public class ChatInterpreter implements Interpretable {
         Set<InetAddress> keySet = clientMap.keySet();
         for (InetAddress inetAddress : keySet) {
             mud.network.server.Connection nextClient = clientMap.get(inetAddress);
-            if (nextClient != exception && nextClient.isOnline()) {
+            if (nextClient != exception) {
                 nextClient.sendMessage(message);
             }
         }

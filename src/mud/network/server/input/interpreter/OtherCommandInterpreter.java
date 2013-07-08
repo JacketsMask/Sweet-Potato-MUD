@@ -51,11 +51,7 @@ public class OtherCommandInterpreter implements Interpretable {
             Connection client = clientMap.get(s);
             serverClients += client.getPlayer().getName();
             //If the client is online, mark them as online
-            if (clientMap.get(s).isOnline()) {
-                serverClients += " [Online]";
-            } else {
-                serverClients += " [Offline]";
-            }
+            serverClients += " [Online]";
             serverClients += "\n";
         }
         //Remove the final newline character

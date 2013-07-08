@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import mud.geography.Area;
 import mud.geography.Room;
+import mud.network.server.log.ConsoleLog;
 
 /**
  * A room manager that holds a list of all the areas and rooms in the MUD.
@@ -32,8 +33,8 @@ public final class AreaManager implements Serializable {
         freeRoomIDs = new ArrayList<>();
         freeAreaIDs = new ArrayList<>();
         masterAreaList = new HashMap<>();
+        System.out.println(ConsoleLog.log() + "Creating starter area.");
         createStarterArea();
-
     }
 
     /**
