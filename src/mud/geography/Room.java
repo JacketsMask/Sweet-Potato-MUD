@@ -32,67 +32,67 @@ public class Room implements Serializable {
         players = new ArrayList<>();
     }
 
-    public void addPlayer(Player player) {
+    public synchronized void addPlayer(Player player) {
         players.add(player);
     }
 
-    public ArrayList<Player> getPlayers() {
+    public synchronized ArrayList<Player> getPlayers() {
         return players;
     }
 
-    public int getRoomID() {
+    public synchronized int getRoomID() {
         return roomID;
     }
 
-    public void setRoomID(int roomID) {
+    public synchronized void setRoomID(int roomID) {
         this.roomID = roomID;
     }
 
-    public String getName() {
+    public synchronized String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public synchronized void setName(String name) {
         this.name = name;
     }
 
-    public String getDescription() {
+    public synchronized String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public synchronized void setDescription(String description) {
         this.description = description;
     }
 
-    public void setNorth(Room north) {
+    public synchronized void setNorth(Room north) {
         this.north = north;
     }
 
-    public void setEast(Room east) {
+    public synchronized void setEast(Room east) {
         this.east = east;
     }
 
-    public void setSouth(Room south) {
+    public synchronized void setSouth(Room south) {
         this.south = south;
     }
 
-    public Room getWest() {
+    public synchronized Room getWest() {
         return west;
     }
 
-    public void setWest(Room west) {
+    public synchronized void setWest(Room west) {
         this.west = west;
     }
 
-    public void setUp(Room up) {
+    public synchronized void setUp(Room up) {
         this.up = up;
     }
 
-    public void setDown(Room down) {
+    public synchronized void setDown(Room down) {
         this.down = down;
     }
 
-    public void removePlayer(Player player) {
+    public synchronized void removePlayer(Player player) {
         players.remove(player);
     }
 
@@ -103,7 +103,7 @@ public class Room implements Serializable {
      * @param direction
      * @return the room, or null if there is no room
      */
-    public Room getRoomInDirection(Direction direction) {
+    public synchronized Room getRoomInDirection(Direction direction) {
         if (direction.equals(Direction.NORTH)) {
             return north;
         }
@@ -130,7 +130,7 @@ public class Room implements Serializable {
      * @return the exists to this room in a formatted string, or null if there
      * are no exits
      */
-    public String getExits() {
+    public synchronized String getExits() {
         if (north == null && east == null && south == null && west == null && up == null && down == null) {
             return "You're trapped!  You can't see any exits!";
         }
