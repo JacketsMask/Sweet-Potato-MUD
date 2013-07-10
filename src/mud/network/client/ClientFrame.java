@@ -20,6 +20,8 @@ public class ClientFrame extends javax.swing.JFrame {
         setLocationByPlatform(true);
         DefaultCaret caret = (DefaultCaret) jTextArea1.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        jTextArea1.setLineWrap(true);
+        jTextField1.requestFocusInWindow();
     }
 
     public JTextArea getjTextArea1() {
