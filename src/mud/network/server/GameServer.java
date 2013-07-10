@@ -58,6 +58,7 @@ public class GameServer implements Runnable {
                         + newClient.getInetAddress());
                 //If the server is local only, only accept one connection
                 if (localOnly) {
+                    System.out.println(ConsoleLog.log() + "Local-only connection established.");
                     break;
                 }
             } catch (IOException ex) {
