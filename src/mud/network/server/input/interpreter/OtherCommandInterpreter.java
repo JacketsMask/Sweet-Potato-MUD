@@ -28,7 +28,7 @@ public class OtherCommandInterpreter implements Interpretable {
         }
         //Check to see if the client is disconnecting
         if (firstWord.equalsIgnoreCase("disconnect")) {
-            System.out.println(ConsoleLog.log() + sender.getPlayer().getName() + " has disconnected.");
+            sender.cleanUpConnection();
             return true;
             //Check to see if the player is communicating with the server
         } else if (firstWord.equalsIgnoreCase("serve")) {
