@@ -51,7 +51,7 @@ public class ChatInterpreter implements Interpretable {
                 //Verify that target is valid
                 Player receiver = master.getPlayer(target);
                 //Target is invalid
-                if (receiver == null) {
+                if (receiver == null || !receiver.getConnection().isOnline()) {
                     sender.sendMessage("I can't seem to find that person.");
                     return true;
                     //Target is valid
