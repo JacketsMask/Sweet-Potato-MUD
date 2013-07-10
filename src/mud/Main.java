@@ -43,7 +43,7 @@ public class Main {
         }
         //Check for local hosting
         if (connectionChoice.equals(ConnectionChoice.LOCAL_CO_OP)) {
-            startServer(true);
+            startServer(false);
         }
         //Otherwise the connection is remote, no need for server
     }
