@@ -65,7 +65,7 @@ public class ChatInterpreter implements Interpretable {
                         return true;
                         //Message to send
                     } else {
-                        receiver.getConnection().sendMessage(targetName + " tells you, \"" + message + "\"");
+                        receiver.getConnection().sendMessage(sender.getPlayer().getName() + " tells you, \"" + message + "\"");
                         sender.sendMessage("You tell " + targetName + ", " + "\"" + message + "\"");
                         return true;
                     }
