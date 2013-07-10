@@ -74,12 +74,14 @@ public class LoginInterpreter implements Interpretable {
         if (currentStage.equals(LoginStage.NAME_CREATION)) {
             String firstWord = input.getFirstWord();
             if (firstWord.equalsIgnoreCase("yes")) {
-                sender.sendMessage("Excellent. You will be known as " + suggestedName);
+                sender.sendMessage("Excellent. You will be known as " + suggestedName + ".");
                 Player player = sender.getPlayer();
                 //Add the player to the visible client map
                 clientMap.put(sender.getClientAddress(), sender);
                 //Set the player's name to whatever they wanted
                 player.setName(suggestedName);
+                //Add the player to the master list
+                master.addPlayer(player);
                 //Spawn the player somewhere
                 master.respawnPlayer(player);
                 //Update the player's interpreter
