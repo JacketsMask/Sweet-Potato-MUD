@@ -127,29 +127,34 @@ public class Room implements Serializable {
     }
 
     /**
-     * @return the exists to this room in a formatted string
+     * @return the exists to this room in a formatted string, or null if there
+     * are no exits
      */
     public String getExits() {
+        if (north == null && east == null && south == null && west == null && up == null && down == null) {
+            return "You're trapped!  You can't see any exits!";
+        }
         String exits = "";
         if (north != null) {
-            exits += "| North | ";
+            exits += "| North ";
         }
         if (east != null) {
-            exits += "| East | ";
+            exits += "| East ";
         }
         if (south != null) {
-            exits += "| South | ";
+            exits += "| South ";
         }
         if (west != null) {
-            exits += "| West | ";
+            exits += "| West ";
         }
         if (up != null) {
-            exits += "| Up | ";
+            exits += "| Up ";
         }
         if (down != null) {
-            exits += "| Down | ";
+            exits += "| Down ";
         }
-        //Remove the last pipe
-        return exits.substring(0, exits.length() - 1);
+        //Add last pipe
+        exits += "|";
+        return exits;
     }
 }

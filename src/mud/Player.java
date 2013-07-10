@@ -1,5 +1,6 @@
 package mud;
 
+import java.util.ArrayList;
 import mud.geography.Room;
 import mud.network.server.Connection;
 
@@ -76,9 +77,30 @@ public class Player {
     }
 
     /**
-     * Gets and displays the description of the room to the player.
+     * Gets and sends the description of the room and contents to the player.
      */
     public void look() {
-        sendMessage("\n" + currentRoom.getName() + "\n" + currentRoom.getDescription() + "\n" + currentRoom.getExits());
+        if (currentRoom == null) {
+            sendMessage("You seem to be in limbo.  How odd.");
+            return;
+        }
+        String description = "\n";
+        //Get room title;
+        description += currentRoom.getName();
+        //Get room description;
+        description += "\n" + currentRoom.getDescription();
+        //Get room exits
+        description += "\n" + currentRoom.getExits();
+        //Get players in room
+        ArrayList<Player> playersList = currentRoom.getPlayers();
+        if (!playersList.isEmpty()) {
+            for (Player p : playersList) {
+                //List the player if this player isn't that player...what?
+                if (!p.equals(this)) {
+                    description += "\n" + p.getName() + " is here.";
+                }
+            }
+        }
+        sendMessage(description);
     }
 }

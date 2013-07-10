@@ -21,6 +21,11 @@ public class OtherCommandInterpreter implements Interpretable {
     @Override
     public boolean interpret(Connection sender, ParsedInput input) {
         String firstWord = input.getFirstWord();
+        //Check to see if client is looking
+        if (input.getWordCount() == 1 && (firstWord.equalsIgnoreCase("look") || firstWord.equalsIgnoreCase("l"))) {
+            sender.getPlayer().look();
+            return true;
+        }
         //Check to see if the client is disconnecting
         if (firstWord.equalsIgnoreCase("disconnect")) {
             System.out.println(ConsoleLog.log() + sender.getPlayer().getName() + " has disconnected.");
