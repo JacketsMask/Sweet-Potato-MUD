@@ -77,13 +77,15 @@ public class Connection {
      *
      * @throws IOException
      */
-    public void cleanUpConnection() {
+    public synchronized void cleanUpConnection() {
         if (connected) {
             try {
                 disconnectClient();
                 reader.fromClient.close();
                 writer.toClient.close();
-                System.out.println(ConsoleLog.log() + this + " disconnected.");
+                System.out.println(ConsoleLog.log() + player.getName() + " has disconnected.");
+                //Remove the player from their current room
+                player.getCurrentRoom().removePlayer(player);
                 connected = false;
             } catch (IOException ex) {
                 Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
@@ -124,6 +126,13 @@ public class Connection {
     }
 
     /**
+     * @return true if this connection is still open
+     */
+    public boolean isOnline() {
+        return connected;
+    }
+
+    /**
      * Reads input from this client and acts upon it.
      */
     private class ClientReader extends Thread {
@@ -159,7 +168,9 @@ public class Connection {
                     }
                     Thread.sleep(SLEEP_DELAY);
                 } catch (NoSuchElementException | IllegalStateException | IOException | InterruptedException e) {
-                    System.out.println(ConsoleLog.log() + " " + connection.getClientAddress() + " reader crashed.");
+                    if (connected) {
+                        System.out.println(ConsoleLog.log() + " " + connection.getClientAddress() + " reader crashed.");
+                    }
                     break;
                 }
             }
