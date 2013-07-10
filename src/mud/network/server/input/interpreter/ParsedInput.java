@@ -50,7 +50,7 @@ public class ParsedInput {
         int size = words.size();
         if (startingWordNumber <= size) {
             String result = "";
-            for (int i = startingWordNumber - 1; i < size; i++) {
+            for (int i = startingWordNumber; i < size; i++) {
                 result += words.get(i) + " ";
                 System.out.println("adding " + words.get(i));
             }
