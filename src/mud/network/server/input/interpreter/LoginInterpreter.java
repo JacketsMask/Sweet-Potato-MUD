@@ -86,10 +86,10 @@ public class LoginInterpreter implements Interpretable {
                 master.respawnPlayer(player);
                 //Update the player's interpreter
                 sender.setInterpreter(new MasterInterpreter(clientMap, master));
-                if (master.playerIsWorldShaper(player)) {
+//                if (master.playerIsWorldShaper(player)) {
                     MasterInterpreter mint = sender.getMasterInterpreter();
                     mint.addInterpreter(new WorldShaperInterpreter(master.getAreaManager()));
-                }
+//                }
                 return true;
             } else if (firstWord.equalsIgnoreCase("no")) {
                 sender.sendMessage("Okay, who are you, then?");
