@@ -1,6 +1,5 @@
 package file;
 
-
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -8,7 +7,7 @@ import java.util.logging.Logger;
 /**
  * Allows retrieval and storage of data in the standard hierarchy of data files.
  * Any interaction with files should be done through this class's static
- * methods.   
+ * methods.
  *
  * @author Japhez
  */
@@ -27,14 +26,19 @@ public class FileManipulator {
         try {
             ObjectOutputStream oStream;
             FileOutputStream fileOut;
-            fileOut = new FileOutputStream(path + fileName);
+            File file = new File(path + fileName);
+            file.createNewFile();
+            fileOut = new FileOutputStream(file);
             oStream = new ObjectOutputStream(fileOut);
             oStream.writeObject(objectToWrite);
             oStream.close();
         } catch (IOException ex) {
             Logger.getLogger(FileManipulator.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
 
+    public static void main(String[] args) {
+        writeObject("bob", "", "bob.txt");
     }
 
     /**
