@@ -39,7 +39,7 @@ public class GameClient {
     private ConnectionChoice connectionChoice;
 
     /**
-     * Creates a new ChatClient with the passed name. Attempts to connect to the
+     * Creates a new GameClient with the passed name. Attempts to connect to the
      * passed address and port.
      *
      * @param address the address of the server
@@ -62,7 +62,7 @@ public class GameClient {
     }
 
     /**
-     * Creates a new ChatClient with only the passed name, and allows the user
+     * Creates a new GameClient with only the passed name, and allows the user
      * to connect manually later.
      *
      * @param output
@@ -198,6 +198,11 @@ public class GameClient {
                 }
                 //Select the text for ease of typing next command
                 commandBar.selectAll();
+                //User wants to clear the window
+                if (text.equalsIgnoreCase("clear")) {
+                    output.setText("");
+                    return;
+                }
                 //Deciding connection type
                 if (currentConnectionStep.equals(ConnectionStep.DECIDING_CONNECTION_TYPE)) {
                     switch (text) {
