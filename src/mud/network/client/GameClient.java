@@ -5,7 +5,6 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -251,12 +250,7 @@ public class GameClient {
                     if (text.equalsIgnoreCase("disconnect")) {
                         currentConnectionStep = ConnectionStep.DISCONNECTED;
                         append("\nYou have disconnected from the server.");
-                        try {
-                            Thread.sleep(2000);
-                            System.exit(0);
-                        } catch (InterruptedException ex) {
-                            Logger.getLogger(GameClient.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+                        System.exit(0);
                     }
                     writer.println(text);
                     //Disconnected
