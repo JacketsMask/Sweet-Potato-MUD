@@ -251,6 +251,12 @@ public class GameClient {
                     if (text.equalsIgnoreCase("disconnect")) {
                         currentConnectionStep = ConnectionStep.DISCONNECTED;
                         append("\nYou have disconnected from the server.");
+                        try {
+                            Thread.sleep(2000);
+                            System.exit(0);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(GameClient.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
                     writer.println(text);
                     //Disconnected
