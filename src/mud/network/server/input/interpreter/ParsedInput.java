@@ -105,7 +105,7 @@ public class ParsedInput {
      */
     public String getWordAtIndex(int wordIndex) {
         //Make sure the word is in bounds of the array
-        if (wordIndex < (wordCount - 1) && wordIndex > -1) {
+        if (wordIndex < wordCount && wordIndex > -1) {
             return words.get(wordIndex);
         }
         return null;
