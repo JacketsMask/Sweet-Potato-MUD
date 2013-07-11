@@ -5,6 +5,7 @@
 package mud.network.server.input.interpreter;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 import mud.GameMaster;
 import mud.network.server.Connection;
@@ -20,38 +21,45 @@ public class MasterInterpreter implements Interpretable {
 
     private GameMaster master;
     private HashMap<InetAddress, Connection> clientMap;
-    private NavigationInterpreter navigationInterpreter;
-    private ChatInterpreter chatInterpreter;
-    private OtherCommandInterpreter otherInterpreter;
-    private static final String PROTOCOL_COMMANDS = "Commands:"
-            + "\n/who (display all connected players)"
-            + "\n/tell player_name message (send a personal message)"
-            + "\n/clear (clears the chat window)"
-            + "\n/connect address:port"
-            + "\n/disconnect (disconnect from the server)";
+    private ArrayList<Interpretable> interpreters;
 
     public MasterInterpreter(HashMap<InetAddress, Connection> clientMap, GameMaster master) {
         this.clientMap = clientMap;
         this.master = master;
-        navigationInterpreter = new NavigationInterpreter(clientMap);
-        chatInterpreter = new ChatInterpreter(clientMap, this.master);
-        otherInterpreter = new OtherCommandInterpreter(clientMap);
+        //Initialize basic interpreters for gameplay
+        interpreters = new ArrayList<>();
+        interpreters.add(new NavigationInterpreter(this.clientMap));
+        interpreters.add(new ChatInterpreter(this.clientMap, this.master));
+        interpreters.add(new OtherCommandInterpreter(this.clientMap));
     }
 
     @Override
     public boolean interpret(Connection sender, ParsedInput input) {
-        //Check movement commands
-        if (navigationInterpreter.interpret(sender, input)) {
-            return true;
-        }
-        //Check chat commands
-        if (chatInterpreter.interpret(sender, input)) {
-            return true;
-        }
-        //Check other commands
-        if (otherInterpreter.interpret(sender, input)) {
-            return true;
+        //Check interpreters
+        for (Interpretable i : interpreters) {
+            if (i.interpret(sender, input)) {
+                return true;
+            }
         }
         return false;
+    }
+
+    /**
+     * Adds the passed interpreter to the list of interpreters for this client.
+     *
+     * @param interpreter
+     */
+    public void addInterpreter(Interpretable interpreter) {
+        interpreters.add(interpreter);
+    }
+
+    /**
+     * Removes the passed interpreter from the list of interpreters for this
+     * client.
+     *
+     * @param interpreter
+     */
+    public void removeInterpreter(Interpretable interpreter) {
+        interpreters.remove(interpreter);
     }
 }
