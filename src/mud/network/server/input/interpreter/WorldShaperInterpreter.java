@@ -151,7 +151,7 @@ public class WorldShaperInterpreter implements Interpretable {
                 //Get info about the area - "area" "info"
                 if (input.getFirstWord().equalsIgnoreCase("area")) {
                     Area area = currentRoom.getArea();
-                    sender.sendMessage("Area" + "#" + area.getAreaID() + ": " + currentRoom.getArea());
+                    sender.sendMessage("Area" + "#" + area.getAreaID() + ": " + currentRoom.getArea().getName());
                     return true;
                 }
             }
