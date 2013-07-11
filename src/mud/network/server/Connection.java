@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import mud.Player;
 import mud.network.server.input.interpreter.Interpretable;
+import mud.network.server.input.interpreter.MasterInterpreter;
 import mud.network.server.input.interpreter.ParsedInput;
 import mud.network.server.log.ConsoleLog;
 
@@ -133,6 +134,13 @@ public class Connection {
     }
 
     /**
+     * @return the master interpreter for this player's connection
+     */
+    public MasterInterpreter getMasterInterpreter() {
+        return (MasterInterpreter) interpreter;
+    }
+
+    /**
      * Reads input from this client and acts upon it.
      */
     private class ClientReader extends Thread {
@@ -161,9 +169,13 @@ public class Connection {
                 try {
                     while ((message = fromClient.readLine()) != null) {
                         ParsedInput parsedInput = new ParsedInput(message);
-                        boolean interpreted = interpreter.interpret(connection, parsedInput);
-                        if (!interpreted) {
-                            sendMessage("I don't get your meaning.");
+                        if (parsedInput.getWordCount() == 0) {
+                            sendMessage("...");
+                        } else {
+                            boolean interpreted = interpreter.interpret(connection, parsedInput);
+                            if (!interpreted) {
+                                sendMessage("I don't get your meaning.");
+                            }
                         }
                     }
                     Thread.sleep(SLEEP_DELAY);
