@@ -52,7 +52,6 @@ public class ParsedInput {
             String result = "";
             for (int i = startingWordNumber; i < size; i++) {
                 result += words.get(i) + " ";
-                System.out.println("adding " + words.get(i));
             }
             //Trim edge whitespace
             result = result.trim();
