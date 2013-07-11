@@ -1,6 +1,7 @@
 package mud;
 
 import java.util.ArrayList;
+import mud.geography.Direction;
 import mud.geography.Room;
 import mud.network.server.Connection;
 
@@ -102,5 +103,30 @@ public class Player {
             }
         }
         sendMessage(description);
+    }
+
+    /**
+     * Attempts to move this player in the given direction, and then gives them
+     * feedback about whether it was successful or not.
+     *
+     * @param direction the direction the player is trying to move
+     */
+    public void move(Direction direction) {
+        Room roomInDirection = currentRoom.getRoomInDirection(direction);
+        if (roomInDirection != null) {
+            //Remove the player from the player list in the current room
+            currentRoom.removePlayer(this);
+            //Send departure message to the room
+            currentRoom.sendMessageToRoom(name + " leaves " + direction + ".");
+            //Send moving message to the player
+            sendMessage("You move " + direction + ".");
+            //Send arrival message to the room
+            roomInDirection.sendMessageToRoom(name + " arrives from the " + Direction.getOppositeDirection(direction) + ".");
+            //Move the player in the given direction
+            setCurrentRoom(roomInDirection);
+            look();
+        } else {
+            sendMessage("You cannot move in that direction.");
+        }
     }
 }
