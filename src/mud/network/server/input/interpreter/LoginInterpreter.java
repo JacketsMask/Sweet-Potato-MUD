@@ -74,7 +74,7 @@ public class LoginInterpreter implements Interpretable {
         if (currentStage.equals(LoginStage.NAME_CREATION)) {
             String firstWord = input.getFirstWord();
             if (firstWord.equalsIgnoreCase("yes")) {
-                sender.sendMessage("Excellent. You will be known as " + suggestedName + ".");
+                sender.sendMessage("Excellent! You will be known as " + suggestedName + ".");
                 Player player = sender.getPlayer();
                 //Add the player to the visible client map
                 clientMap.put(sender.getClientAddress(), sender);
@@ -86,6 +86,10 @@ public class LoginInterpreter implements Interpretable {
                 master.respawnPlayer(player);
                 //Update the player's interpreter
                 sender.setInterpreter(new MasterInterpreter(clientMap, master));
+                if (master.playerIsWorldShaper(player)) {
+                    MasterInterpreter mint = sender.getMasterInterpreter();
+                    mint.addInterpreter(new WorldShaperInterpreter(master.getAreaManager()));
+                }
                 return true;
             } else if (firstWord.equalsIgnoreCase("no")) {
                 sender.sendMessage("Okay, who are you, then?");
