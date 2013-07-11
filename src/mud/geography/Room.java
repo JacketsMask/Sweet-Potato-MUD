@@ -207,8 +207,15 @@ public class Room implements Serializable {
             down = newRoom;
         }
     }
-    
-    public void sendMessageToRoom(Player sender) {
-        //TODO: do this at some point
+
+    /**
+     * Sends the passed message to all players in the room.
+     *
+     * @param message
+     */
+    public void sendMessageToRoom(String message) {
+        for (Player p : players) {
+            p.sendMessage(message);
+        }
     }
 }
