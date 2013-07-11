@@ -3,6 +3,7 @@ package mud.network.server.input.interpreter;
 import java.util.ArrayList;
 import mud.AreaManager;
 import mud.Player;
+import mud.geography.Area;
 import mud.geography.Direction;
 import mud.geography.Room;
 import mud.network.server.Connection;
@@ -78,9 +79,9 @@ public class WorldShaperInterpreter implements Interpretable {
                     if (direction.equals(Direction.UP)) {
                         sender.sendMessage(targetRoom.getName() + " is now above you.");
                     } else if (direction.equals((Direction.DOWN))) {
-                        sender.sendMessage(targetRoom.getName() + " of here now lies below you.");
+                        sender.sendMessage(targetRoom.getName() + " now lies below you.");
                     } else {
-                        sender.sendMessage(direction + " of here now lies " + targetRoom.getName() + ".");
+                        sender.sendMessage(targetRoom.getName()+ " now lies to the " + direction + " of here.");
                     }
                     return true;
                 } else {
@@ -110,7 +111,7 @@ public class WorldShaperInterpreter implements Interpretable {
                     } else if (direction.equals(Direction.DOWN)) {
                         sender.sendMessage("Something appears below you.");
                     } else {
-                        sender.sendMessage("Something interesting just appeared to the " + direction + ".");
+                        sender.sendMessage("Something interesting just appeared to the " + direction + "." + " (#" + newRoom.getRoomID() + ")");
                     }
                     return true;
                 }
@@ -140,7 +141,22 @@ public class WorldShaperInterpreter implements Interpretable {
                     }
                 }
             }
+            //Info
+            if (input.getWordAtIndex(1).equalsIgnoreCase("info")) {
+                //Get info about the room - "room" "info"
+                if (input.getFirstWord().equalsIgnoreCase("room")) {
+                    sender.sendMessage("Room ID: #" + currentRoom.getRoomID());
+                    return true;
+                }
+                //Get info about the area - "area" "info"
+                if (input.getFirstWord().equalsIgnoreCase("area")) {
+                    Area area = currentRoom.getArea();
+                    sender.sendMessage("Area" + "#" + area.getAreaID() + ": " + currentRoom.getArea());
+                    return true;
+                }
+            }
         }
+        System.out.println(input.getOriginalInput() + input.getWordCount());
         return false;
     }
 
