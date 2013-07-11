@@ -90,7 +90,7 @@ public class Player {
         //Get room description;
         description += "\n" + currentRoom.getDescription();
         //Get room exits
-        description += "\n" + currentRoom.getExits();
+        description += "\n" + currentRoom.getFormattedExits();
         //Get players in room
         ArrayList<Player> playersList = currentRoom.getPlayers();
         if (!playersList.isEmpty()) {
