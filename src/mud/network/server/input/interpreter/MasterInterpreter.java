@@ -28,7 +28,7 @@ public class MasterInterpreter implements Interpretable {
         this.master = master;
         //Initialize basic interpreters for gameplay
         interpreters = new ArrayList<>();
-        interpreters.add(new NavigationInterpreter(this.clientMap));
+        interpreters.add(new NavigationInterpreter());
         interpreters.add(new ChatInterpreter(this.clientMap, this.master));
         interpreters.add(new OtherCommandInterpreter(this.clientMap));
     }
