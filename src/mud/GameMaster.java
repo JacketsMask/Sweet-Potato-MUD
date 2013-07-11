@@ -1,8 +1,9 @@
 package mud;
 
 import file.FileManipulator;
-import java.util.ArrayList;
+import java.util.HashMap;
 import mud.geography.Room;
+import mud.network.server.log.ConsoleLog;
 
 /**
  * The game manager that stores area, and player data. This is the top-level
@@ -12,9 +13,10 @@ import mud.geography.Room;
  */
 public class GameMaster {
 
-    public final static String MAIN_DATA_PATH = "/data/";
+    public final static String MAIN_DATA_PATH = "data//";
     private AreaManager areaManager;
-    private ArrayList<Player> players;
+    private HashMap<String, Player> players;
+    private HashMap<String, Player> worldShapers;
 
     /**
      * Creates a new GameMaster, then attempts to load in an existing
@@ -26,9 +28,26 @@ public class GameMaster {
         if (FileManipulator.fileExists(MAIN_DATA_PATH, "AreaManager.data")) {
             areaManager = (AreaManager) FileManipulator.readObject(MAIN_DATA_PATH, "AreaManager.data");
         } else {
+            System.out.println(ConsoleLog.log() + "AreaManager not found, creating new one.");
             areaManager = new AreaManager();
         }
-        players = new ArrayList<>();
+        players = new HashMap<>();
+        worldShapers = new HashMap<>();
+        //I exist in all worlds for some reason
+        Player player = new Player("Japhez");
+        worldShapers.put("Japhez", player);
+    }
+
+    public void addWorldShaper(Player player) {
+        worldShapers.put(player.getName(), player);
+    }
+
+    /**
+     * @param player
+     * @return true if the passed player is a World Shaper
+     */
+    public boolean playerIsWorldShaper(Player player) {
+        return (worldShapers.get(player.getName()) != null);
     }
 
     /**
@@ -37,7 +56,7 @@ public class GameMaster {
      * @param player the player to be added
      */
     public void addPlayer(Player player) {
-        players.add(player);
+        players.put(player.getName(), player);
     }
 
     /**
@@ -46,7 +65,7 @@ public class GameMaster {
      * @param player the player to be removed
      */
     public void removePlayer(Player player) {
-        players.remove(player);
+        players.remove(player.getName());
     }
 
     /**
@@ -64,12 +83,7 @@ public class GameMaster {
      * @return the player, or null
      */
     public Player getPlayer(String name) {
-        for (Player p : players) {
-            if (p.getName().equalsIgnoreCase(name)) {
-                return p;
-            }
-        }
-        return null;
+        return players.get(name);
     }
 
     /**
