@@ -57,6 +57,8 @@ public class LoginInterpreter implements Interpretable {
                     sender.sendMessage("That's quite the mouthful.  Try something with less than 9 characters?");
                     return true;
                 }
+                //Make first letter in name uppercase, rest lower case
+                suggestedName = Character.toUpperCase(suggestedName.charAt(0)) + suggestedName.substring(1).toLowerCase();
                 Player existingPlayer = master.getPlayer(suggestedName);
                 //Player name isn't yet taken
                 if (existingPlayer == null) {
