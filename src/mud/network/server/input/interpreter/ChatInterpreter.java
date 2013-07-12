@@ -64,6 +64,18 @@ public class ChatInterpreter implements Interpretable {
                         sender.sendMessage("What would you like to tell " + targetName + "?");
                         return true;
                         //Message to send
+                    } else if (sender.getPlayer().getName().equals(receiver.getName())) {
+                        Room currentRoom = sender.getPlayer().getCurrentRoom();
+                        ArrayList<Player> players = currentRoom.getPlayers();
+                        for (Player p : players) {
+                            //Don't send message to sender
+                            if (p != sender.getPlayer()) {
+                                p.sendMessage(sender.getPlayer().getName() + " mutters to themselves...");
+                            }
+                        }
+                        //Send message to sender
+                        sender.sendMessage("You mutter to yourself.  Are you feeling okay?");
+                        return true;
                     } else {
                         receiver.getConnection().sendMessage(sender.getPlayer().getName() + " tells you, \"" + message + "\"");
                         sender.sendMessage("You tell " + targetName + ", " + "\"" + message + "\"");
