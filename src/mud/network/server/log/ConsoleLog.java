@@ -2,7 +2,6 @@ package mud.network.server.log;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
-import java.util.TimeZone;
 
 /**
  * A class whose only purpose is to be used with its static log() method to
