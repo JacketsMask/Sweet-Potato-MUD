@@ -2,6 +2,7 @@ package mud;
 
 import file.FileManipulator;
 import java.util.HashMap;
+import java.util.Set;
 import mud.geography.Room;
 import mud.network.server.log.ConsoleLog;
 
@@ -83,7 +84,15 @@ public class GameMaster {
      * @return the player, or null
      */
     public Player getPlayer(String name) {
-        return players.get(name);
+        Player p = null;
+        Set<String> names = players.keySet();
+        
+        for (String currentName : names) {
+            if (name.equalsIgnoreCase(currentName))
+                p = players.get(currentName);
+        }
+        
+        return p;
     }
 
     /**
