@@ -200,7 +200,7 @@ public class GameClient {
                 commandBar.selectAll();
                 //User wants to clear the window
                 if (text.equalsIgnoreCase("clear")) {
-                    output.setText("");
+                    clearOutputWindow();
                     return;
                 }
                 //Deciding connection type
