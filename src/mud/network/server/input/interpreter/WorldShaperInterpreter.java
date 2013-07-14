@@ -19,7 +19,7 @@ import mud.network.server.Connection;
  *
  * @author Japhez
  */
-public class WorldShaperInterpreter implements Interpretable {
+public class WorldShaperInterpreter extends Interpreter {
 
     private AreaManager areaManger;
 
