@@ -10,9 +10,7 @@ import mud.network.server.log.ConsoleLog;
  *
  * @author Japhez
  */
-public class OtherCommandInterpreter implements Interpretable {
-
-    private HashMap<InetAddress, Connection> clientMap;
+public class OtherCommandInterpreter extends Interpreter {
 
     public OtherCommandInterpreter(HashMap<InetAddress, Connection> clientMap) {
         this.clientMap = clientMap;
@@ -30,7 +28,7 @@ public class OtherCommandInterpreter implements Interpretable {
         if (firstWord.equalsIgnoreCase("disconnect")) {
             sender.cleanUpConnection();
             return true;
-            //Check to see if the player is communicating with the server
+        //Check to see if the player is communicating with the server
         } else if (firstWord.equalsIgnoreCase("serve")) {
             String message = input.getWordsStartingAtIndex(1);
             if (message == null) {
@@ -41,6 +39,14 @@ public class OtherCommandInterpreter implements Interpretable {
                 sender.sendMessage("I hear you.");
                 return true;
             }
+        //Check if the user wants to know who is currently connected.
+        } else if (firstWord.equalsIgnoreCase("who")) {
+            String who = "Players online:\n";
+            for (Connection c : clientMap.values()) {
+                who += "   " + c.getPlayer().getName() + "\n";
+            }
+            sender.sendMessage(who);
+            return true;
         }
         return false;
     }
