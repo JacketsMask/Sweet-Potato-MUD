@@ -53,7 +53,7 @@ public class GameServer implements Runnable {
         while (!Thread.interrupted()) {
             try {
                 Socket newClient = serverSocket.accept();
-                connect(newClient);
+                clientMap.put(newClient.getInetAddress(), connect(newClient));
                 System.out.println(ConsoleLog.log() + "Player connected from "
                         + newClient.getInetAddress());
                 //If the server is local only, only accept one connection
@@ -67,7 +67,7 @@ public class GameServer implements Runnable {
         }
     }
 
-    private Connection connect(Socket socket) {
+    private synchronized Connection connect(Socket socket) {
         Connection connection = null;
         try {
             //Create a temporary (unlisted) character until info is validated
