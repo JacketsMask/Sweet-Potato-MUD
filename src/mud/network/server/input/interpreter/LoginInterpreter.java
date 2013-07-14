@@ -11,10 +11,8 @@ import mud.network.server.Connection;
  *
  * @author Japhez
  */
-public class LoginInterpreter implements Interpretable {
+public class LoginInterpreter extends Interpreter {
 
-    private HashMap<InetAddress, Connection> clientMap;
-    private GameMaster master;
     private LoginStage currentStage;
     private String suggestedName;
 
@@ -104,7 +102,7 @@ public class LoginInterpreter implements Interpretable {
         }
         return false;
     }
-
+    
     /**
      * Sets the current stage of the login process.
      *
