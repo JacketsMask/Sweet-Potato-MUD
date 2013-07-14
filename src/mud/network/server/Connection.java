@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mud.Player;
-import mud.network.server.input.interpreter.Interpretable;
+import mud.network.server.input.interpreter.Interpreter;
 import mud.network.server.input.interpreter.MasterInterpreter;
 import mud.network.server.input.interpreter.ParsedInput;
 import mud.network.server.log.ConsoleLog;
@@ -31,7 +31,7 @@ public class Connection {
     private ClientReader reader;
     private Thread writerThread;
     private Thread readerThread;
-    private Interpretable interpreter;
+    private Interpreter interpreter;
 
     /**
      * Creates a new Connection which contains connection information for the
@@ -40,7 +40,7 @@ public class Connection {
      * @param client
      * @throws IOException
      */
-    public Connection(Socket client, InetAddress address, Player player, Interpretable interpreter) throws IOException {
+    public Connection(Socket client, InetAddress address, Player player, Interpreter interpreter) throws IOException {
         this.client = client;
         this.address = address;
         connected = true;
@@ -56,7 +56,7 @@ public class Connection {
      *
      * @param interpreter
      */
-    public void setInterpreter(Interpretable interpreter) {
+    public void setInterpreter(Interpreter interpreter) {
         this.interpreter = interpreter;
     }
 
@@ -82,6 +82,8 @@ public class Connection {
         if (connected) {
             try {
                 disconnectClient();
+                //Remove player from the client map
+                interpreter.removeFromClientMap(address);
                 reader.fromClient.close();
                 writer.toClient.close();
                 System.out.println(ConsoleLog.log() + player.getName() + " has disconnected.");
