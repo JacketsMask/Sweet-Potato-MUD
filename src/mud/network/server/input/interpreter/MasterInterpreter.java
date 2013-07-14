@@ -17,11 +17,9 @@ import mud.network.server.Connection;
  *
  * @author Japhez
  */
-public class MasterInterpreter implements Interpretable {
+public class MasterInterpreter extends Interpreter {
 
-    private GameMaster master;
-    private HashMap<InetAddress, Connection> clientMap;
-    private ArrayList<Interpretable> interpreters;
+    private ArrayList<Interpreter> interpreters;
 
     public MasterInterpreter(HashMap<InetAddress, Connection> clientMap, GameMaster master) {
         this.clientMap = clientMap;
@@ -36,7 +34,7 @@ public class MasterInterpreter implements Interpretable {
     @Override
     public boolean interpret(Connection sender, ParsedInput input) {
         //Check interpreters
-        for (Interpretable i : interpreters) {
+        for (Interpreter i : interpreters) {
             if (i.interpret(sender, input)) {
                 return true;
             }
@@ -49,7 +47,7 @@ public class MasterInterpreter implements Interpretable {
      *
      * @param interpreter
      */
-    public void addInterpreter(Interpretable interpreter) {
+    public void addInterpreter(Interpreter interpreter) {
         interpreters.add(interpreter);
     }
 
@@ -59,7 +57,7 @@ public class MasterInterpreter implements Interpretable {
      *
      * @param interpreter
      */
-    public void removeInterpreter(Interpretable interpreter) {
+    public void removeInterpreter(Interpreter interpreter) {
         interpreters.remove(interpreter);
     }
 }
