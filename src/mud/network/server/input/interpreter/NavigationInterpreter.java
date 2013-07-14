@@ -9,7 +9,7 @@ import mud.network.server.Connection;
  *
  * @author Japhez
  */
-public class NavigationInterpreter implements Interpretable {
+public class NavigationInterpreter extends Interpreter {
 
     public NavigationInterpreter() {
     }
