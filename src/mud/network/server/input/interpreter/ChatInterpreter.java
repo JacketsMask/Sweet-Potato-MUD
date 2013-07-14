@@ -17,10 +17,7 @@ import mud.network.server.Connection;
  *
  * @author Japhez
  */
-public class ChatInterpreter implements Interpretable {
-
-    private HashMap<InetAddress, Connection> clientMap;
-    private GameMaster master;
+public class ChatInterpreter extends Interpreter {
 
     public ChatInterpreter(HashMap<InetAddress, Connection> clientMap, GameMaster master) {
         this.clientMap = clientMap;
