@@ -1,5 +1,6 @@
 package mud.network.server.input.interpreter;
 
+import java.util.ArrayList;
 import mud.Player;
 import mud.geography.Direction;
 import mud.network.server.Connection;
@@ -12,6 +13,14 @@ import mud.network.server.Connection;
 public class NavigationInterpreter extends Interpreter {
 
     public NavigationInterpreter() {
+    }
+
+    @Override
+    public ArrayList<CommandHelpFile> getCommandsAndUsages() {
+        String category = "Navigation";
+        ArrayList<CommandHelpFile> commands = new ArrayList<>();
+        commands.add(new CommandHelpFile(category, "north, n, east, e, west, w, south, s, up, u, down, d", "Move in the desired direction."));
+        return commands;
     }
 
     @Override

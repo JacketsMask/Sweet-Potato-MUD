@@ -1,6 +1,7 @@
 package mud.network.server.input.interpreter;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import mud.network.server.Connection;
@@ -17,6 +18,15 @@ public class OtherCommandInterpreter extends Interpreter {
     }
 
     @Override
+    public ArrayList<CommandHelpFile> getCommandsAndUsages() {
+        String category = "Other";
+        ArrayList<CommandHelpFile> commands = new ArrayList<>();
+        commands.add(new CommandHelpFile(category, "disconnect", "Disconnects you from the server."));
+        commands.add(new CommandHelpFile(category, "who", "Lists players connected to the server."));
+        return commands;
+    }
+
+    @Override
     public boolean interpret(Connection sender, ParsedInput input) {
         String firstWord = input.getFirstWord();
         //Check to see if client is looking
@@ -28,18 +38,7 @@ public class OtherCommandInterpreter extends Interpreter {
         if (firstWord.equalsIgnoreCase("disconnect")) {
             sender.cleanUpConnection();
             return true;
-        //Check to see if the player is communicating with the server
-        } else if (firstWord.equalsIgnoreCase("serve")) {
-            String message = input.getWordsStartingAtIndex(1);
-            if (message == null) {
-                sender.sendMessage("Why tell the server nothing?");
-                return true;
-            } else {
-                System.out.println(ConsoleLog.log() + sender.getPlayer().getName() + " talks to the server: " + "\"" + message + "\"");
-                sender.sendMessage("I hear you.");
-                return true;
-            }
-        //Check if the user wants to know who is currently connected.
+            //Check if the user wants to know who is currently connected.
         } else if (firstWord.equalsIgnoreCase("who")) {
             String who = "Players online:\n";
             for (Connection c : clientMap.values()) {

@@ -31,8 +31,33 @@ public class MasterInterpreter extends Interpreter {
         interpreters.add(new OtherCommandInterpreter(this.clientMap));
     }
 
+    public void sendCommandHelpList(Connection sender) {
+        String commandList = "\n";
+        for (Interpreter i : interpreters) {
+            ArrayList<CommandHelpFile> commandsAndUsages = i.getCommandsAndUsages();
+            if (commandsAndUsages != null) {
+                String category = commandsAndUsages.get(0).getCategory();
+                commandList += category + "\n";
+                for (CommandHelpFile c : commandsAndUsages) {
+                    if (c.getSyntax() != null) {
+                        commandList += "   " + c.getSyntax() + "\n";
+                    }
+                    if (c.getDescription() != null) {
+                        commandList += "      " + c.getDescription() + "\n";
+                    }
+                }
+            }
+        }
+        sender.sendMessage(commandList);
+    }
+
     @Override
     public boolean interpret(Connection sender, ParsedInput input) {
+        //Check for help command.
+        if (input.getOriginalInput().equalsIgnoreCase("help")) {
+            sendCommandHelpList(sender);
+            return true;
+        }
         //Check interpreters
         for (Interpreter i : interpreters) {
             if (i.interpret(sender, input)) {

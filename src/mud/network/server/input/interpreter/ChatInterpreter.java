@@ -24,6 +24,15 @@ public class ChatInterpreter extends Interpreter {
         this.master = master;
     }
 
+    @Override
+    public ArrayList<CommandHelpFile> getCommandsAndUsages() {
+        String category = "Chat";
+        ArrayList<CommandHelpFile> commands = new ArrayList<>();
+        commands.add(new CommandHelpFile(category, "tell {player} {message}", "Sends a personal message to the player if they're online."));
+        commands.add(new CommandHelpFile(category, "say {message}", "Sends a message to everyone in current game."));
+        return commands;
+    }
+
     /**
      * Interprets the packet passed in, and takes action if this packet relates
      * to communication, then returns true. Otherwise this method returns false.
