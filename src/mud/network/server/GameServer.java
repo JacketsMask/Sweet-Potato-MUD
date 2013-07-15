@@ -72,7 +72,7 @@ public class GameServer implements Runnable {
         try {
             //Create a temporary (unlisted) character until info is validated
             Player player = new Player("NoOne");
-            connection = new Connection(socket, socket.getInetAddress(), player, new LoginInterpreter(clientMap, gameMaster));
+            connection = new Connection(socket, player, new LoginInterpreter(clientMap, gameMaster));
             //The player stores a reference to their current connection for convenience
             player.setConnection(connection);
             connection.sendMessage("Please enter your character name.");
