@@ -28,6 +28,22 @@ public class WorldShaperInterpreter extends Interpreter {
     }
 
     @Override
+    public ArrayList<CommandHelpFile> getCommandsAndUsages() {
+        String category = "World Shaper";
+        ArrayList<CommandHelpFile> commands = new ArrayList<>();
+        commands.add(new CommandHelpFile(category, "area info", "Displays information about the area you are in."));
+        commands.add(new CommandHelpFile(category, "room info", "Displays information about the room you were in."));
+        commands.add(new CommandHelpFile(category, "area name {name}", "Change the name of the area you are in."));
+        commands.add(new CommandHelpFile(category, "room name {name}", "Change the name of the room you are in."));
+        commands.add(new CommandHelpFile(category, "room description {description}", "Change the description of the room you are in."));
+        commands.add(new CommandHelpFile(category, "link {direction} {roomID}", "Links an exit of this room to the specified room."));
+        commands.add(new CommandHelpFile(category, "unlink {direction}", "Removes the exit from this room in the given direction."));
+        commands.add(new CommandHelpFile(category, "create {direction}", "Creates a new room in the specified direction."));
+        commands.add(new CommandHelpFile(category, "delete {direction}", "Unlinks all connection to the room in the passed direction, then deletes the room forever."));
+        return commands;
+    }
+
+    @Override
     public boolean interpret(Connection sender, ParsedInput input) {
         int wordCount = input.getWordCount();
         ArrayList<String> words = input.getWords();
@@ -81,7 +97,7 @@ public class WorldShaperInterpreter extends Interpreter {
                     } else if (direction.equals((Direction.DOWN))) {
                         sender.sendMessage(targetRoom.getName() + " now lies below you.");
                     } else {
-                        sender.sendMessage(targetRoom.getName()+ " now lies to the " + direction + " of here.");
+                        sender.sendMessage(targetRoom.getName() + " now lies to the " + direction + " of here.");
                     }
                     return true;
                 } else {
