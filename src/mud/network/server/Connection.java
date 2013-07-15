@@ -40,9 +40,9 @@ public class Connection {
      * @param client
      * @throws IOException
      */
-    public Connection(Socket client, InetAddress address, Player player, Interpreter interpreter) throws IOException {
+    public Connection(Socket client, Player player, Interpreter interpreter) throws IOException {
         this.client = client;
-        this.address = address;
+        this.address = client.getInetAddress();
         connected = true;
         this.player = player;
         this.interpreter = interpreter;
