@@ -54,7 +54,11 @@ public class Room implements Serializable {
      */
     public boolean linkToRoom(Direction direction, Room room) {
         //If either room is already linked with the necessary direction, return false
-        if (getRoomInDirection(direction) != null || room.getRoomInDirection(Direction.getOppositeDirection(direction)) != null) {
+        Room roomInDirection = getRoomInDirection(direction);
+        if (roomInDirection != null) {
+            return false;
+        }
+        if (room.getRoomInDirection(Direction.getOppositeDirection(direction)) != null) {
             return false;
         } else {
             //Link this room to that
