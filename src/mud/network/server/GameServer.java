@@ -53,13 +53,17 @@ public class GameServer implements Runnable {
         while (!Thread.interrupted()) {
             try {
                 Socket newClient = serverSocket.accept();
-                clientMap.put(newClient.getInetAddress(), connect(newClient));
-                System.out.println(ConsoleLog.log() + "Player connected from "
-                        + newClient.getInetAddress());
-                //If the server is local only, only accept one connection
-                if (localOnly) {
-                    System.out.println(ConsoleLog.log() + "Local-only connection established.");
-                    break;
+                Connection connection = connect(newClient);
+                //Make sure the connection was correctly established
+                if (connection != null) {
+                    clientMap.put(newClient.getInetAddress(), connection);
+                    System.out.println(ConsoleLog.log() + "Player connected from "
+                            + newClient.getInetAddress());
+                    //If the server is local only, only accept one connection
+                    if (localOnly) {
+                        System.out.println(ConsoleLog.log() + "Local-only connection established.");
+                        break;
+                    }
                 }
             } catch (IOException ex) {
                 Logger.getLogger(GameServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -68,6 +72,10 @@ public class GameServer implements Runnable {
     }
 
     private synchronized Connection connect(Socket socket) {
+        //Don't allow duplicate connections
+        if (clientMap.get(socket.getInetAddress()) != null) {
+            return null;
+        }
         Connection connection = null;
         try {
             //Create a temporary (unlisted) character until info is validated
