@@ -129,4 +129,11 @@ public class Player {
             sendMessage("You cannot move in that direction.");
         }
     }
+
+    /**
+     * Saves this player's data locally.
+     */
+    public void save() {
+        //TODO: This
+    }
 }
