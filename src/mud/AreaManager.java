@@ -158,4 +158,18 @@ public final class AreaManager implements Serializable {
     public void addRoom(Room room) {
         masterRoomList.put(room.getRoomID(), room);
     }
+
+    /**
+     * Loads an area from the passed file and adds it to the list.
+     *
+     * @param file
+     */
+    private void loadArea(File file) {
+        //Load in the area from the file
+        Area area = (Area) FileManipulator.readObject(file.getPath(), file.getName());
+        //Add the area wuth its existing area id to the master area list
+        //TODO: Check for duplicate area IDs before adding to list
+        masterAreaList.put(area.getAreaID(), area);
+        //TODO: Update available area and room IDs
+    }
 }
