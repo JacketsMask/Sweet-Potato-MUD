@@ -2,7 +2,7 @@ package mud.network.server.input.interpreter;
 
 /**
  *
- * @author Jacob
+ * @author Japhez
  */
 public class CommandHelpFile {
 
