@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Set;
 import mud.GameMaster;
 import mud.Player;
+import mud.PlayerManager;
 import mud.geography.Room;
 import mud.network.server.Connection;
 
@@ -18,10 +19,13 @@ import mud.network.server.Connection;
  * @author Japhez
  */
 public class ChatInterpreter extends Interpreter {
+    
+    private PlayerManager playerManager;
 
     public ChatInterpreter(HashMap<InetAddress, Connection> clientMap, GameMaster master) {
         this.clientMap = clientMap;
         this.master = master;
+        this.playerManager = master.getPlayerManager();
     }
 
     @Override
@@ -55,7 +59,7 @@ public class ChatInterpreter extends Interpreter {
                 //Target argument is there
             } else {
                 //Verify that target is valid
-                Player receiver = master.getPlayer(target);
+                Player receiver = playerManager.getPlayer(target);
                 //Target is invalid
                 if (receiver == null || !receiver.getConnection().isOnline()) {
                     sender.sendMessage("I can't seem to find that person.");
