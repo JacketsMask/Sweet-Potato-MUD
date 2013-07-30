@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import mud.network.server.Connection;
-import mud.network.server.log.ConsoleLog;
 
 /**
  *
@@ -67,22 +66,5 @@ public class OtherCommandInterpreter extends Interpreter {
         //Remove the final newline character
         serverClients = serverClients.substring(0, serverClients.length() - 1);
         return serverClients;
-    }
-
-    /**
-     * Returns true if the passed name is a client that has connected to the
-     * server.
-     *
-     * @param name the name to check
-     * @return true if the name has been taken by a client
-     */
-    private boolean isNameTaken(String name) {
-        Set<InetAddress> keySet = clientMap.keySet();
-        for (InetAddress i : keySet) {
-            if (clientMap.get(i).getPlayer().getName().equalsIgnoreCase(name)) {
-                return true;
-            }
-        }
-        return false;
     }
 }
