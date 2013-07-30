@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import mud.GameMaster;
 import mud.Player;
+import mud.PlayerManager;
 import mud.network.server.Connection;
 
 /**
@@ -15,11 +16,13 @@ public class LoginInterpreter extends Interpreter {
 
     private LoginStage currentStage;
     private String suggestedName;
+    private PlayerManager playerManager;
 
     public LoginInterpreter(HashMap<InetAddress, Connection> clientMap, GameMaster master) {
         this.clientMap = clientMap;
         this.master = master;
         currentStage = LoginStage.NAME_SELECTION;
+        playerManager = master.getPlayerManager();
     }
 
     /**
@@ -57,39 +60,41 @@ public class LoginInterpreter extends Interpreter {
                 }
                 //Make first letter in name uppercase, rest lower case
                 suggestedName = Character.toUpperCase(suggestedName.charAt(0)) + suggestedName.substring(1).toLowerCase();
-                Player existingPlayer = master.getPlayer(suggestedName);
-                //Player name isn't yet taken
-                if (existingPlayer == null) {
-                    sender.sendMessage("I don't know that name, would you like to be " + suggestedName + "? (\"yes\"/\"no\")");
-                    this.setCurrentStage(LoginStage.NAME_CREATION);
+                //See if player data is in memory
+                if (playerManager.getPlayer(suggestedName) != null) {
+                    //Use player data from memory
+                    sender.sendMessage("Welcome back, " + suggestedName + ".");
+                    sender.setPlayer(playerManager.getPlayer(suggestedName));
+                    finishLogin(sender);
                     return true;
-                    //Player name is taken
                 } else {
-                    sender.sendMessage("What's your password, " + suggestedName + "?");
-                    this.setCurrentStage(LoginStage.PASSWORD_INPUT);
-                    return true;
+                    //Attempt to load in the player
+                    Player loadedPlayer = playerManager.loadPlayer(suggestedName);
+                    //Player name isn't yet taken
+                    if (loadedPlayer == null) {
+                        sender.sendMessage("I don't know that name, would you like to be " + suggestedName + "? (\"yes\"/\"no\")");
+                        this.setCurrentStage(LoginStage.NAME_CREATION);
+                        return true;
+                        //Player name is taken
+                    } else {
+                        //Add them to the list in game if they haven't been yet
+                        if (playerManager.getPlayer(loadedPlayer.getName()) == null) {
+                            playerManager.addPlayer(loadedPlayer);
+                        }
+                        sender.sendMessage("Welcome back, " + suggestedName + ".");
+                        sender.setPlayer(playerManager.getPlayer(suggestedName));
+                        finishLogin(sender);
+                        return true;
+                    }
                 }
             }
         }
+        //Name creation stage
         if (currentStage.equals(LoginStage.NAME_CREATION)) {
             String firstWord = input.getFirstWord();
             if (firstWord.equalsIgnoreCase("yes")) {
                 sender.sendMessage("Excellent! You will be known as " + suggestedName + ".");
-                Player player = sender.getPlayer();
-                //Add the player to the visible client map
-                clientMap.put(sender.getClientAddress(), sender);
-                //Set the player's name to whatever they wanted
-                player.setName(suggestedName);
-                //Add the player to the master list
-                master.addPlayer(player);
-                //Spawn the player somewhere
-                master.respawnPlayer(player);
-                //Update the player's interpreter
-                sender.setInterpreter(new MasterInterpreter(clientMap, master));
-//                if (master.playerIsWorldShaper(player)) {
-                    MasterInterpreter mint = sender.getMasterInterpreter();
-                    mint.addInterpreter(new WorldShaperInterpreter(master.getAreaManager()));
-//                }
+                createNewPlayer(sender);
                 return true;
             } else if (firstWord.equalsIgnoreCase("no")) {
                 sender.sendMessage("Okay, who are you, then?");
@@ -100,9 +105,16 @@ public class LoginInterpreter extends Interpreter {
                 return true;
             }
         }
+        //Password input stage
+        if (currentStage.equals(LoginStage.PASSWORD_INPUT)) {
+            sender.sendMessage("Just kidding, password functionality isn't in yet.  Lets get you in the game...");
+            //checkPassword(input.getOriginalInput());
+            finishLogin(sender);
+            return true;
+        }
         return false;
     }
-    
+
     /**
      * Sets the current stage of the login process.
      *
@@ -110,5 +122,44 @@ public class LoginInterpreter extends Interpreter {
      */
     public void setCurrentStage(LoginStage stage) {
         this.currentStage = stage;
+    }
+
+    private void checkPassword(String password) {
+    }
+
+    private void createNewPlayer(Connection connection) {
+        Player player = connection.getPlayer();
+        //Set the player's name to whatever they wanted
+        player.setName(suggestedName);
+        //Add the player to the master list
+        playerManager.addPlayer(player);
+        finishLogin(connection);
+        //Save player file
+        playerManager.savePlayer(player);
+    }
+
+    /**
+     * Change the interpreter and end the login process.
+     *
+     * @param connection
+     */
+    private void finishLogin(Connection connection) {
+        Player player = connection.getPlayer();
+        //Add the player to the visible client map
+        clientMap.put(connection.getClientAddress(), connection);
+        //Update the player's interpreter
+        connection.setInterpreter(new MasterInterpreter(clientMap, master));
+        //TODO: In the future don't grant every player world shaper status
+//                if (master.playerIsWorldShaper(player)) {
+        MasterInterpreter mint = connection.getMasterInterpreter();
+        mint.addInterpreter(new WorldShaperInterpreter(master.getAreaManager()));
+        //                }
+        if (player.getCurrentRoom() == null) {
+            master.respawnPlayer(connection.getPlayer());
+        } else {
+            //Return the player to the world
+            player.setCurrentRoom(player.getCurrentRoom());
+        }
+        player.look();
     }
 }
