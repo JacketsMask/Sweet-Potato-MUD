@@ -15,6 +15,7 @@ public class Player implements Serializable {
 
     private Connection connection;
     private String name;
+    private char[] password;
     private Room currentRoom;
     private Room respawnRoom;
     boolean needsSaving;
@@ -22,6 +23,14 @@ public class Player implements Serializable {
     public Player(String name) {
         this.name = name;
         needsSaving = false;
+    }
+
+    public char[] getPassword() {
+        return password;
+    }
+
+    public void setPassword(char[] password) {
+        this.password = password;
     }
 
     public boolean needsSaving() {
@@ -66,7 +75,6 @@ public class Player implements Serializable {
         this.currentRoom = currentRoom; //Set current room
         currentRoom.addPlayer(this); //Add player to current room
         needsSaving = true;
-        System.out.println(name + " needs saving");
     }
 
     /**

@@ -88,7 +88,7 @@ public class PlayerManager {
             //Retrieve the player
             Player player = (Player) FileManipulator.readObject(GameMaster.MAIN_DATA_PATH + PATH, playerName + EXTENSION);
             if (player.getCurrentRoom() == null) {
-                System.out.println("crap");
+                System.out.println("Attempting to load a player with a null current room...");
             }
             //Add them to the player list
             players.put(player.getName(), player);
@@ -129,7 +129,6 @@ public class PlayerManager {
                     //If the player needs saving, re-serialize their data
                     if (p.needsSaving) {
                         savePlayer(p);
-                        System.out.println(p.getName() + " data saved.");
                         p.hasBeenSaved();
                     }
                 }

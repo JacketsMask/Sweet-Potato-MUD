@@ -63,7 +63,8 @@ public class GameMaster {
     }
 
     /**
-     * Respawns the passed player and forces them to look at the room.
+     * Moves the passed player to their respawn (or the respawn room in
+     * AreaManager if the player doesn't have one).
      *
      * @param player
      */
@@ -79,6 +80,5 @@ public class GameMaster {
             System.out.println("crap, respawn room is null somehow");
         }
         player.setCurrentRoom(respawnRoom);
-        player.look();
     }
 }
