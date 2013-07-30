@@ -2,7 +2,6 @@ package mud;
 
 import file.FileManipulator;
 import java.util.HashMap;
-import java.util.Set;
 import mud.geography.Room;
 import mud.network.server.log.ConsoleLog;
 
@@ -16,7 +15,7 @@ public class GameMaster {
 
     public final static String MAIN_DATA_PATH = "data//";
     private AreaManager areaManager;
-    private HashMap<String, Player> players;
+    private PlayerManager playerManager;
     private HashMap<String, Player> worldShapers;
 
     /**
@@ -31,12 +30,17 @@ public class GameMaster {
         } else {
             System.out.println(ConsoleLog.log() + "AreaManager not found, creating new one.");
             areaManager = new AreaManager();
+            FileManipulator.writeObject(areaManager, MAIN_DATA_PATH, "AreaManager.data");
         }
-        players = new HashMap<>();
+        playerManager = new PlayerManager();
         worldShapers = new HashMap<>();
         //I exist in all worlds for some reason
         Player player = new Player("Japhez");
         worldShapers.put("Japhez", player);
+    }
+
+    public PlayerManager getPlayerManager() {
+        return playerManager;
     }
 
     public void addWorldShaper(Player player) {
@@ -52,47 +56,10 @@ public class GameMaster {
     }
 
     /**
-     * Adds the passed player to the player list.
-     *
-     * @param player the player to be added
-     */
-    public void addPlayer(Player player) {
-        players.put(player.getName(), player);
-    }
-
-    /**
-     * Removes the passed player from the player list.
-     *
-     * @param player the player to be removed
-     */
-    public void removePlayer(Player player) {
-        players.remove(player.getName());
-    }
-
-    /**
      * @return the area manager
      */
     public AreaManager getAreaManager() {
         return areaManager;
-    }
-
-    /**
-     * Returns the player with the passed name if they exist in the system.
-     * Otherwise returns null.
-     *
-     * @param name
-     * @return the player, or null
-     */
-    public Player getPlayer(String name) {
-        Player p = null;
-        Set<String> names = players.keySet();
-        
-        for (String currentName : names) {
-            if (name.equalsIgnoreCase(currentName))
-                p = players.get(currentName);
-        }
-        
-        return p;
     }
 
     /**
