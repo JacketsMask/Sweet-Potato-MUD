@@ -1,5 +1,6 @@
 package mud;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import mud.geography.Direction;
 import mud.geography.Room;
@@ -10,15 +11,25 @@ import mud.network.server.Connection;
  *
  * @author Japhez
  */
-public class Player {
+public class Player implements Serializable {
 
     private Connection connection;
     private String name;
     private Room currentRoom;
     private Room respawnRoom;
+    boolean needsSaving;
 
     public Player(String name) {
         this.name = name;
+        needsSaving = false;
+    }
+
+    public boolean needsSaving() {
+        return needsSaving;
+    }
+
+    public void hasBeenSaved() {
+        this.needsSaving = false;
     }
 
     public void setConnection(Connection connection) {
@@ -42,19 +53,20 @@ public class Player {
     }
 
     /**
-     * This is the primary way you should move a player from one room to
-     * another. Removes the player from an existing old room, sets their current
-     * room to the new room, and adds them to that room's occupant list.
+     * Removes the player from an existing old room, sets their current
+     * room to the new room, and adds them to that room's occupant list.  Similar to the move method, but more explicit
      *
      * @param currentRoom
      */
     public void setCurrentRoom(Room currentRoom) {
         //If the player is currently in a room
-        if (currentRoom != null) {
-            currentRoom.removePlayer(this); //Remove player from old room
+        if (this.currentRoom != null) {
+            this.currentRoom.removePlayer(this); //Remove player from old room
         }
         this.currentRoom = currentRoom; //Set current room
         currentRoom.addPlayer(this); //Add player to current room
+        needsSaving = true;
+        System.out.println(name + " needs saving");
     }
 
     /**
@@ -124,16 +136,10 @@ public class Player {
             roomInDirection.sendMessageToRoom(name + " arrives from the " + Direction.getOppositeDirection(direction) + ".");
             //Move the player in the given direction
             setCurrentRoom(roomInDirection);
+            //Force the player to look
             look();
         } else {
             sendMessage("You cannot move in that direction.");
         }
-    }
-
-    /**
-     * Saves this player's data locally.
-     */
-    public void save() {
-        //TODO: This
     }
 }
