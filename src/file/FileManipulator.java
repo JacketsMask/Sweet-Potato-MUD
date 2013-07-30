@@ -67,4 +67,15 @@ public class FileManipulator {
         File file = new File(path + fileName);
         return file.exists();
     }
+
+    /**
+     * Retrieves an array of all files in the passed directory, or null if none
+     * are found.
+     *
+     * @param path
+     * @return a array of files if any exist, else null
+     */
+    public static File[] getFiles(String path) {
+        return (new File(path).listFiles());
+    }
 }
