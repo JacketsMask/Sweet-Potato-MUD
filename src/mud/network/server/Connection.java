@@ -143,9 +143,20 @@ public class Connection {
     }
 
     /**
+     * Sets the player reference for this connection, and the player's reference
+     * to this connection.
+     *
+     * @param player
+     */
+    public void setPlayer(Player player) {
+        this.player = player;
+        player.setConnection(this);
+    }
+
+    /**
      * Reads input from this client and acts upon it.
      */
-    private class ClientReader extends Thread {
+    private class ClientReader implements Runnable {
 
         private Connection connection;
         private BufferedReader fromClient;
