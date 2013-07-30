@@ -1,6 +1,7 @@
 package mud.network.server.input.interpreter;
 
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.HashMap;
 import mud.GameMaster;
 import mud.Player;
@@ -30,7 +31,7 @@ public class LoginInterpreter extends Interpreter {
      */
     public enum LoginStage {
 
-        CONNECTION, NAME_SELECTION, NAME_CREATION, PASSWORD_INPUT
+        CONNECTION, NAME_SELECTION, NAME_CREATION, PASSWORD_SELECTION, PASSWORD_INPUT, PASSWORD_FINISHED
     }
 
     @Override
@@ -63,9 +64,9 @@ public class LoginInterpreter extends Interpreter {
                 //See if player data is in memory
                 if (playerManager.getPlayer(suggestedName) != null) {
                     //Use player data from memory
-                    sender.sendMessage("Welcome back, " + suggestedName + ".");
+                    sender.sendMessage("Please input your password.");
                     sender.setPlayer(playerManager.getPlayer(suggestedName));
-                    finishLogin(sender);
+                    currentStage = LoginStage.PASSWORD_INPUT;
                     return true;
                 } else {
                     //Attempt to load in the player
@@ -81,9 +82,9 @@ public class LoginInterpreter extends Interpreter {
                         if (playerManager.getPlayer(loadedPlayer.getName()) == null) {
                             playerManager.addPlayer(loadedPlayer);
                         }
-                        sender.sendMessage("Welcome back, " + suggestedName + ".");
+                        sender.sendMessage("Please input your password.");
+                        currentStage = LoginStage.PASSWORD_INPUT;
                         sender.setPlayer(playerManager.getPlayer(suggestedName));
-                        finishLogin(sender);
                         return true;
                     }
                 }
@@ -94,7 +95,8 @@ public class LoginInterpreter extends Interpreter {
             String firstWord = input.getFirstWord();
             if (firstWord.equalsIgnoreCase("yes")) {
                 sender.sendMessage("Excellent! You will be known as " + suggestedName + ".");
-                createNewPlayer(sender);
+                sender.sendMessage("What would you like your password to be, " + suggestedName + "?");
+                currentStage = LoginStage.PASSWORD_SELECTION;
                 return true;
             } else if (firstWord.equalsIgnoreCase("no")) {
                 sender.sendMessage("Okay, who are you, then?");
@@ -105,11 +107,25 @@ public class LoginInterpreter extends Interpreter {
                 return true;
             }
         }
+        //Password selection stage
+        if (currentStage.equals(LoginStage.PASSWORD_SELECTION)) {
+            validatePasswordChoice(sender, input);
+            if (currentStage.equals(LoginStage.PASSWORD_FINISHED)) {
+                createNewPlayer(sender);
+                sender.sendMessage("Welcome, traveler...");
+                finishLogin(sender);
+            }
+            return true;
+        }
         //Password input stage
         if (currentStage.equals(LoginStage.PASSWORD_INPUT)) {
-            sender.sendMessage("Just kidding, password functionality isn't in yet.  Lets get you in the game...");
-            //checkPassword(input.getOriginalInput());
-            finishLogin(sender);
+            if (checkPassword(sender.getPlayer(), input)) {
+                sender.sendMessage("Welcome, " + sender.getPlayer().getName() + ".");
+                finishLogin(sender);
+            } else {
+                sender.sendMessage("Invalid password, please try again.");
+                System.out.println("Invalid password from " + sender.getClientAddress() + ". \"" + String.valueOf(sender.getPlayer().getPassword()) + "\" expected.");
+            }
             return true;
         }
         return false;
@@ -124,7 +140,37 @@ public class LoginInterpreter extends Interpreter {
         this.currentStage = stage;
     }
 
-    private void checkPassword(String password) {
+    /**
+     * Returns true if the passed password matches the passed player.
+     *
+     * @param player
+     * @param password
+     * @return true if the password works, false otherwise
+     */
+    private boolean checkPassword(Player player, ParsedInput input) {
+        char[] password = input.getFirstWord().toCharArray();
+        return (Arrays.equals(password, player.getPassword()));
+    }
+
+    /**
+     * Validates and sets the user's desired password.
+     *
+     * @param sender
+     * @param input
+     */
+    private void validatePasswordChoice(Connection sender, ParsedInput input) {
+        if (input.getWordCount() != 1) {
+            sender.sendMessage("Your password must only be one word.");
+            return;
+        }
+        if (input.getFirstWord().length() < 4 || input.getFirstWord().length() > 10) {
+            sender.sendMessage("Your password should be between 4 and 10 characters.");
+            return;
+        }
+        System.out.println("your password: " + input.getFirstWord());
+        sender.getPlayer().setPassword(input.getFirstWord().toCharArray());
+        currentStage = LoginStage.PASSWORD_FINISHED;
+        sender.sendMessage("Remember your password, there's no other way to access your player currently!");
     }
 
     private void createNewPlayer(Connection connection) {
@@ -133,7 +179,6 @@ public class LoginInterpreter extends Interpreter {
         player.setName(suggestedName);
         //Add the player to the master list
         playerManager.addPlayer(player);
-        finishLogin(connection);
         //Save player file
         playerManager.savePlayer(player);
     }
