@@ -18,8 +18,8 @@ public class LoginInterpreter extends Interpreter {
     private LoginStage currentStage;
     private String suggestedName;
     private PlayerManager playerManager;
-    public static final int NAME_MIN_LENGTH = 4;
-    public static final int NAME_MAX_LENGTH = 8;
+    private static final int NAME_MIN_LENGTH = 4;
+    private static final int NAME_MAX_LENGTH = 8;
 
     public LoginInterpreter(HashMap<InetAddress, Connection> clientMap, GameMaster master) {
         this.clientMap = clientMap;
