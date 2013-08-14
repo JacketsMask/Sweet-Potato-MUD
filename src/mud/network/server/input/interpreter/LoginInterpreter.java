@@ -18,6 +18,8 @@ public class LoginInterpreter extends Interpreter {
     private LoginStage currentStage;
     private String suggestedName;
     private PlayerManager playerManager;
+    public static final int NAME_MIN_LENGTH = 4;
+    public static final int NAME_MAX_LENGTH = 8;
 
     public LoginInterpreter(HashMap<InetAddress, Connection> clientMap, GameMaster master) {
         this.clientMap = clientMap;
@@ -51,11 +53,11 @@ public class LoginInterpreter extends Interpreter {
             } else {
                 suggestedName = input.getFirstWord();
                 //Verify name length
-                if (suggestedName.length() < 3) {
-                    sender.sendMessage("That's an awfully short name, don't you think? Try something with at least 3 characters.");
+                if (suggestedName.length() < NAME_MIN_LENGTH) {
+                    sender.sendMessage("That's an awfully short name, don't you think? Try something with at least 4 characters.");
                     return true;
                 }
-                if (suggestedName.length() > 8) {
+                if (suggestedName.length() > NAME_MAX_LENGTH) {
                     sender.sendMessage("That's quite the mouthful.  Try something with less than 9 characters?");
                     return true;
                 }
