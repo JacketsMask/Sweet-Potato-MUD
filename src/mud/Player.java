@@ -11,17 +11,14 @@ import mud.network.server.Connection;
  *
  * @author Japhez
  */
-public class Player implements Serializable {
+public class Player extends NPC implements Serializable {
 
     private Connection connection;
-    private String name;
     private char[] password;
-    private Room currentRoom;
-    private Room respawnRoom;
     boolean needsSaving;
 
     public Player(String name) {
-        this.name = name;
+        super(name);
         needsSaving = false;
     }
 
@@ -49,24 +46,14 @@ public class Player implements Serializable {
         return connection;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Room getCurrentRoom() {
-        return currentRoom;
-    }
-
     /**
-     * Removes the player from an existing old room, sets their current
-     * room to the new room, and adds them to that room's occupant list.  Similar to the move method, but more explicit
+     * Removes the player from an existing old room, sets their current room to
+     * the new room, and adds them to that room's occupant list. Similar to the
+     * move method, but more explicit
      *
      * @param currentRoom
      */
+    @Override
     public void setCurrentRoom(Room currentRoom) {
         //If the player is currently in a room
         if (this.currentRoom != null) {
@@ -75,17 +62,6 @@ public class Player implements Serializable {
         this.currentRoom = currentRoom; //Set current room
         currentRoom.addPlayer(this); //Add player to current room
         needsSaving = true;
-    }
-
-    /**
-     * @return this player's respawn room
-     */
-    public Room getRespawnRoom() {
-        return respawnRoom;
-    }
-
-    public void setRespawnRoom(Room respawnRoom) {
-        this.respawnRoom = respawnRoom;
     }
 
     /**
@@ -112,6 +88,13 @@ public class Player implements Serializable {
         description += "\n" + currentRoom.getDescription();
         //Get room exits
         description += "\n" + currentRoom.getFormattedExits();
+        //Get NPCs in room
+        ArrayList<NPC> NPClist = currentRoom.getNPCs();
+        if (!NPClist.isEmpty()) {
+            for (NPC n : NPClist) {
+                description += "\n" + n.getName() + " is here.";
+            }
+        }
         //Get players in room
         ArrayList<Player> playersList = currentRoom.getPlayers();
         if (!playersList.isEmpty()) {
@@ -131,6 +114,7 @@ public class Player implements Serializable {
      *
      * @param direction the direction the player is trying to move
      */
+    @Override
     public void move(Direction direction) {
         Room roomInDirection = currentRoom.getRoomInDirection(direction);
         if (roomInDirection != null) {
