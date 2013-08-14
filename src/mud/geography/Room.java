@@ -3,6 +3,7 @@ package mud.geography;
 import java.io.Serializable;
 import java.util.ArrayList;
 import mud.AreaManager;
+import mud.NPC;
 import mud.Player;
 
 /**
@@ -24,7 +25,7 @@ public class Room implements Serializable {
     private Room down;
     //private HashMap<String, Room> hiddenExits; //TODO: Milestone #2
     //private ArrayList<Item> items; //TODO: Milestone #2
-    //private ArrayList<NPC> npcs; //TODO: Milestone #2
+    private ArrayList<NPC> NPCs;
     private ArrayList<Player> players;
 
     public Room(Area area, AreaManager areaManger) {
@@ -38,6 +39,8 @@ public class Room implements Serializable {
         description = "You're in a nondescript room.";
         //Initialize player list
         players = new ArrayList<>();
+        //Initialize NPC list
+        NPCs = new ArrayList<>();
         //Add the room to the area
         area.addRoom(this);
         //Add the room to the global list
@@ -92,8 +95,16 @@ public class Room implements Serializable {
         return area;
     }
 
+    public synchronized void addNPC(NPC character) {
+        NPCs.add(character);
+    }
+
     public synchronized void addPlayer(Player player) {
         players.add(player);
+    }
+
+    public ArrayList<NPC> getNPCs() {
+        return NPCs;
     }
 
     public synchronized ArrayList<Player> getPlayers() {
@@ -122,6 +133,10 @@ public class Room implements Serializable {
 
     public synchronized void removePlayer(Player player) {
         players.remove(player);
+    }
+
+    public synchronized void removeNPC(NPC character) {
+        NPCs.remove(character);
     }
 
     /**
