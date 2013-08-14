@@ -2,6 +2,7 @@ package mud.network.server.input.interpreter;
 
 import java.util.ArrayList;
 import mud.AreaManager;
+import mud.NPC;
 import mud.Player;
 import mud.geography.Area;
 import mud.geography.Direction;
@@ -40,6 +41,8 @@ public class WorldShaperInterpreter extends Interpreter {
         commands.add(new CommandHelpFile(category, "unlink {direction}", "Removes the exit from this room in the given direction."));
         commands.add(new CommandHelpFile(category, "create {direction}", "Creates a new room in the specified direction."));
         commands.add(new CommandHelpFile(category, "delete {direction}", "Unlinks all connection to the room in the passed direction, then deletes the room forever."));
+        commands.add(new CommandHelpFile(category, "npc create {name}", "Creates a new NPC in this room with the passed name."));
+        commands.add(new CommandHelpFile(category, "npc delete {name}", "Deletes the NPC with the passed name if they are currently in the room."));
         return commands;
     }
 
@@ -170,6 +173,54 @@ public class WorldShaperInterpreter extends Interpreter {
                     sender.sendMessage("Area" + "#" + area.getAreaID() + ": " + currentRoom.getArea().getName());
                     return true;
                 }
+            }
+        }
+        if (wordCount == 3) {
+            //Create npc
+            if (input.getWordsUpToIndex(1).equalsIgnoreCase("npc create")) {
+                String NPCName = input.getWordAtIndex(2);
+                //Validate name length
+                if (NPCName.length() < 2) {
+                    sender.sendMessage("That's not a very meaningful name.");
+                    return true;
+                }
+                //Create the new NPC
+                NPC npc = new NPC(NPCName);
+                currentRoom.addNPC(npc);
+                sender.sendMessage(npc.getName() + " appears out of thin air!");
+                return true;
+            } //Delete NPC
+            if (input.getWordsUpToIndex(1).equalsIgnoreCase("npc delete")) {
+                String NPCName = words.get(2);
+                ArrayList<NPC> NPCs = currentRoom.getNPCs();
+                for (NPC npc : NPCs) {
+                    //Check for a matching name, and remove if it exists
+                    if (npc.getName().equalsIgnoreCase(NPCName)) {
+                        currentRoom.removeNPC(npc);
+                        sender.sendMessage(npc.getName() + " is no more!");
+                        return true;
+                    }
+                }
+                sender.sendMessage("What's a \"" + NPCName + "\"?");
+                return true;
+            }
+        }
+        if (wordCount == 5) {
+            //Change NPC name
+            if (input.getWordsUpToIndex(2).equalsIgnoreCase("npc modify name")) {
+                String NPCName = words.get(3);
+                String NPCNewName = words.get(4);
+                ArrayList<NPC> NPCs = currentRoom.getNPCs();
+                for (NPC npc : NPCs) {
+                    //Check for a matching name, and change the name if it exists
+                    if (npc.getName().equalsIgnoreCase(NPCName)) {
+                        sender.sendMessage(npc.getName() + " is now " + NPCNewName + ".");
+                        npc.setName(NPCNewName);
+                        return true;
+                    }
+                }
+                sender.sendMessage("I can't find " + NPCName + ".");
+                return false;
             }
         }
         System.out.println(input.getOriginalInput() + input.getWordCount());
