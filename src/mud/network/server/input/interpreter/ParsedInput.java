@@ -109,4 +109,19 @@ public class ParsedInput {
         }
         return null;
     }
+
+    /**
+     * Retrieves words up to the passed index.
+     *
+     * @param index
+     * @return a string consisting of words up to the passed index.
+     */
+    public String getWordsUpToIndex(int index) {
+        String result = "";
+        for (int i = 0; i <= index; i++) {
+            result += words.get(i) + " ";
+        }
+        //Trim the extra whitespace and return
+        return result.trim();
+    }
 }
