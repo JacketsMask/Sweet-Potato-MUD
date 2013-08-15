@@ -11,20 +11,30 @@ public class Item implements Serializable {
 
     private int weight;
     private int value;
-    private String name;
+    private String shortName;
+    private String longName;
 
-    public Item(int weight, int value, String name) {
+    public Item(int weight, int value, String shortName, String longName) {
         this.weight = weight;
         this.value = value;
-        this.name = name;
+        this.shortName = shortName;
+        this.longName = longName;
     }
 
-    public String getName() {
-        return name;
+    public String getShortName() {
+        return shortName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
+    }
+
+    public String getLongName() {
+        return longName;
+    }
+
+    public void setLongName(String longName) {
+        this.longName = longName;
     }
 
     public int getValue() {
