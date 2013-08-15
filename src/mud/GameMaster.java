@@ -1,5 +1,6 @@
 package mud;
 
+import mud.characters.Player;
 import file.FileManipulator;
 import java.util.HashMap;
 import mud.geography.Room;

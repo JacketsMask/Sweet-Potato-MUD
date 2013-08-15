@@ -1,5 +1,6 @@
 package mud;
 
+import mud.characters.Player;
 import file.FileManipulator;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -127,7 +128,7 @@ public class PlayerManager {
                 //Check through player list on an interval, saving them when necessary
                 for (Player p : players.values()) {
                     //If the player needs saving, re-serialize their data
-                    if (p.needsSaving) {
+                    if (p.needsSaving()) {
                         savePlayer(p);
                         p.hasBeenSaved();
                     }
