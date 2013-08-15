@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mud.GameMaster;
-import mud.Player;
+import mud.characters.Player;
 import mud.network.server.input.interpreter.LoginInterpreter;
 import mud.network.server.log.ConsoleLog;
 

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import mud.GameMaster;
-import mud.Player;
+import mud.characters.Player;
 import mud.PlayerManager;
 import mud.geography.Room;
 import mud.network.server.Connection;

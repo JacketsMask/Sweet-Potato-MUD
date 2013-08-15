@@ -4,7 +4,7 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.HashMap;
 import mud.GameMaster;
-import mud.Player;
+import mud.characters.Player;
 import mud.PlayerManager;
 import mud.network.server.Connection;
 

@@ -2,8 +2,8 @@ package mud.network.server.input.interpreter;
 
 import java.util.ArrayList;
 import mud.AreaManager;
-import mud.NPC;
-import mud.Player;
+import mud.characters.NPC;
+import mud.characters.Player;
 import mud.geography.Area;
 import mud.geography.Direction;
 import mud.geography.Room;

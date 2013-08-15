@@ -1,7 +1,7 @@
 package mud.network.server.input.interpreter;
 
 import java.util.ArrayList;
-import mud.Player;
+import mud.characters.Player;
 import mud.geography.Direction;
 import mud.network.server.Connection;
 

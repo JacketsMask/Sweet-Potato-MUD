@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import mud.Player;
+import mud.characters.Player;
 import mud.network.server.input.interpreter.Interpreter;
 import mud.network.server.input.interpreter.MasterInterpreter;
 import mud.network.server.input.interpreter.ParsedInput;
