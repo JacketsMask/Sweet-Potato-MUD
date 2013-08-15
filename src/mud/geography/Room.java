@@ -3,8 +3,8 @@ package mud.geography;
 import java.io.Serializable;
 import java.util.ArrayList;
 import mud.AreaManager;
-import mud.NPC;
-import mud.Player;
+import mud.characters.NPC;
+import mud.characters.Player;
 
 /**
  * Represents a room for an area of the MUD.
