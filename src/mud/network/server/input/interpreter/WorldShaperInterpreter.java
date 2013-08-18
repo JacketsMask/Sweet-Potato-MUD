@@ -46,184 +46,186 @@ public class WorldShaperInterpreter extends Interpreter {
         return commands;
     }
 
+    private boolean commandAreaNameChange(Connection sender, ParsedInput input) {
+        //Change current area's name - "area" "name" "new name"
+        if (input.getWordCount() > 2 && input.getWordsUpToIndex(1).equalsIgnoreCase("area name")) {
+            String areaName = input.getWordsStartingAtIndex(2);
+            sender.getPlayer().getCurrentRoom().getArea().setName(areaName);
+            sender.sendMessage("This area is now know as " + areaName + ".");
+            return true;
+        }
+        return false;
+    }
+
+    private boolean commandRoomNameChange(Connection sender, ParsedInput input) {
+        //Change current room's name - "room" "name" "new name"
+        ArrayList<String> words = input.getWords();
+        if (input.getWordCount() > 2 && input.getWordsUpToIndex(1).equalsIgnoreCase("room name")) {
+            String newName = "";
+            for (int i = 2; i < input.getWordCount(); i++) {
+                newName += words.get(i) + " ";
+            }
+            newName = newName.trim();
+            sender.getPlayer().getCurrentRoom().setName(newName);
+            sender.sendMessage("Room title updated.");
+            return true;
+        }
+        return false;
+    }
+
+    private boolean commandRoomDescriptionChange(Connection sender, ParsedInput input) {
+        if (input.getWordCount() > 2 && input.getWordsUpToIndex(1).equalsIgnoreCase("room description")) {
+            String newDescription = input.getWordsStartingAtIndex(2);
+            newDescription = newDescription.trim();
+            sender.getPlayer().getCurrentRoom().setDescription(newDescription);
+            sender.sendMessage("Room description updated.");
+            return true;
+        }
+        return false;
+    }
+
+    private boolean commandRoomLink(Connection sender, ParsedInput input) {
+        //Link this room to an existing room - "link" "direction" "roomID"
+        ArrayList<String> words = input.getWords();
+        if (input.getWordCount() > 2 && input.getFirstWord().equalsIgnoreCase("link") && (Direction.getDirectionFromString(words.get(1)) != null)) {
+            Direction direction = Direction.getDirectionFromString(words.get(1));
+            int roomID;
+            try {
+                roomID = Integer.parseInt(words.get(2));
+            } catch (NumberFormatException ex) {
+                sender.sendMessage("That's not a number.");
+                return true;
+            }
+            Room targetRoom = areaManger.getRoom(roomID);
+            if (sender.getPlayer().getCurrentRoom().linkToRoom(direction, targetRoom)) {
+                if (direction.equals(Direction.UP)) {
+                    sender.sendMessage(targetRoom.getName() + " is now above you.");
+                } else if (direction.equals((Direction.DOWN))) {
+                    sender.sendMessage(targetRoom.getName() + " now lies below you.");
+                } else {
+                    sender.sendMessage(targetRoom.getName() + " now lies to the " + direction + " of here.");
+                }
+                return true;
+            } else {
+                sender.sendMessage("Unable to link rooms.  Are both room exists available?");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean commandCreateRoom(Connection sender, ParsedInput input) {
+        //Create a new room and link to this - "create" "direction"
+        Direction direction = Direction.getDirectionFromString(input.getWordAtIndex(1));
+        Room currentRoom = sender.getPlayer().getCurrentRoom();
+        if (input.getWordCount() == 2 && direction != null) {
+            //Create a new room and link to this - "create" "direction"
+            if (input.getFirstWord().equalsIgnoreCase("create")) {
+                //First check to make sure direction is clear
+                if (currentRoom.getRoomInDirection(direction) != null) {
+                    sender.sendMessage("There's already a room in that direction.");
+                    return true;
+                }
+                //Create the new room
+                Room newRoom = new Room(sender.getPlayer().getCurrentRoom().getArea(), areaManger);
+                //Link the room to this one
+                currentRoom.linkToRoom(direction, newRoom);
+                if (direction.equals(Direction.UP)) {
+                    sender.sendMessage("Something appears above you.");
+                } else if (direction.equals(Direction.DOWN)) {
+                    sender.sendMessage("Something appears below you.");
+                } else {
+                    sender.sendMessage("Something interesting just appeared to the " + direction + "." + " (#" + newRoom.getRoomID() + ")");
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean commandUnlinkRoom(Connection sender, ParsedInput input) {
+        //Unlink the passed direction - "unlink" "direction"
+        Direction direction = Direction.getDirectionFromString(input.getWordAtIndex(1));
+        if (input.getWordCount() == 2 && direction != null && input.getFirstWord().equalsIgnoreCase("unlink")) {
+            sender.getPlayer().getCurrentRoom().unlinkExits(new Direction[]{direction});
+            if (direction.equals(Direction.UP)) {
+                sender.sendMessage("There's nothing overhead anymore.");
+            } else if (direction.equals(Direction.DOWN)) {
+                sender.sendMessage("There's nothing below you anymore.");
+            } else {
+                sender.sendMessage("Nothing to the " + direction + " of here seems interesting anymore.");
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean commandDeleteRoom(Connection sender, ParsedInput input) {
+        //Delete the room in the passed direction - "delete" "direction"
+        Direction direction = Direction.getDirectionFromString(input.getWordAtIndex(1));
+        if (input.getWordCount() == 2 && direction != null && input.getFirstWord().equalsIgnoreCase("delete")) {
+            Room doomedRoom = sender.getPlayer().getCurrentRoom().getRoomInDirection(direction);
+            //Check to make sure that the room exists
+            if (doomedRoom != null) {
+                areaManger.deleteRoom(doomedRoom);
+                sender.sendMessage(doomedRoom.getName() + " vanishes into nothingness.");
+                return true;
+            } else {
+                sender.sendMessage("There's already nothing over there.  Mission accomplished I guess?");
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public boolean interpret(Connection sender, ParsedInput input) {
-        int wordCount = input.getWordCount();
-        ArrayList<String> words = input.getWords();
-        Room currentRoom = sender.getPlayer().getCurrentRoom();
-        //More than 2 word commands
-        if (wordCount > 2) {
-            //Change current area's name - "area" "name" "new name"
-            if (input.getFirstWord().equalsIgnoreCase("area")) {
-                if (words.get(1).equalsIgnoreCase("name")) {
-                    String areaName = input.getWordsStartingAtIndex(2);
-                    sender.getPlayer().getCurrentRoom().getArea().setName(areaName);
-                    sender.sendMessage("This area is now know as " + areaName + ".");
-                    return true;
-                }
-            }
-            if (input.getFirstWord().equalsIgnoreCase("room")) {
-                //Change current room's name - "room" "name" "new name"
-                if (words.get(1).equalsIgnoreCase("name")) {
-                    String newName = "";
-                    for (int i = 2; i < wordCount; i++) {
-                        newName += words.get(i) + " ";
-                    }
-                    newName = newName.trim();
-                    currentRoom.setName(newName);
-                    sender.sendMessage("Room title updated.");
-                    return true;
-                }
-                //Change current room's description - "room" "description" "new description"
-                if (words.get(1).equalsIgnoreCase("description")) {
-                    String newDescription = input.getWordsStartingAtIndex(2);
-                    newDescription = newDescription.trim();
-                    currentRoom.setDescription(newDescription);
-                    sender.sendMessage("Room description updated.");
-                    return true;
-                }
-            }
-            //Link this room to an existing room - "link" "direction" "roomID"
-            if (input.getFirstWord().equalsIgnoreCase("link") && (Direction.getDirectionFromString(words.get(1)) != null)) {
-                Direction direction = Direction.getDirectionFromString(words.get(1));
-                int roomID;
-                try {
-                    roomID = Integer.parseInt(words.get(2));
-                } catch (NumberFormatException ex) {
-                    sender.sendMessage("That's not a number.");
-                    return true;
-                }
-                Room targetRoom = areaManger.getRoom(roomID);
-                if (currentRoom.linkToRoom(direction, targetRoom)) {
-                    if (direction.equals(Direction.UP)) {
-                        sender.sendMessage(targetRoom.getName() + " is now above you.");
-                    } else if (direction.equals((Direction.DOWN))) {
-                        sender.sendMessage(targetRoom.getName() + " now lies below you.");
-                    } else {
-                        sender.sendMessage(targetRoom.getName() + " now lies to the " + direction + " of here.");
-                    }
-                    return true;
-                } else {
-                    sender.sendMessage("Unable to link rooms.  Are both room exists available?");
-                    return true;
-                }
-            }
+        if (commandAreaNameChange(sender, input)) {
+            return true;
         }
-        //Two word commands
-        if (wordCount == 2) {
-            //All other commands take a direction as their second argument, make sure it is valid
-            Direction direction = Direction.getDirectionFromString(words.get(1));
-            if (direction != null) {
-                //Create a new room and link to this - "create" "direction"
-                if (input.getFirstWord().equalsIgnoreCase("create")) {
-                    //First check to make sure direction is clear
-                    if (currentRoom.getRoomInDirection(direction) != null) {
-                        sender.sendMessage("There's already a room in that direction.");
-                        return true;
-                    }
-                    //Create the new room
-                    Room newRoom = new Room(sender.getPlayer().getCurrentRoom().getArea(), areaManger);
-                    //Link the room to this one
-                    currentRoom.linkToRoom(direction, newRoom);
-                    if (direction.equals(Direction.UP)) {
-                        sender.sendMessage("Something appears above you.");
-                    } else if (direction.equals(Direction.DOWN)) {
-                        sender.sendMessage("Something appears below you.");
-                    } else {
-                        sender.sendMessage("Something interesting just appeared to the " + direction + "." + " (#" + newRoom.getRoomID() + ")");
-                    }
-                    return true;
-                }
-                //Unlink the passed direction - "unlink" "direction"
-                if (input.getFirstWord().equalsIgnoreCase("unlink")) {
-                    currentRoom.unlinkExits(new Direction[]{direction});
-                    if (direction.equals(Direction.UP)) {
-                        sender.sendMessage("There's nothing overhead anymore.");
-                    } else if (direction.equals(Direction.DOWN)) {
-                        sender.sendMessage("There's nothing below you anymore.");
-                    } else {
-                        sender.sendMessage("Nothing to the " + direction + " of here seems interesting anymore.");
-                    }
-                    return true;
-                }
-                //Delete the room in the passed direction - "delete" "direction"
-                if (input.getFirstWord().equalsIgnoreCase("delete")) {
-                    Room doomedRoom = currentRoom.getRoomInDirection(direction);
-                    //Check to make sure that the room exists
-                    if (doomedRoom != null) {
-                        areaManger.deleteRoom(doomedRoom);
-                        sender.sendMessage(doomedRoom.getName() + " vanishes into nothingness.");
-                        return true;
-                    } else {
-                        sender.sendMessage("There's already nothing over there.  Mission accomplished I guess?");
-                        return true;
-                    }
-                }
-            }
-            //Info
-            if (input.getWordAtIndex(1).equalsIgnoreCase("info")) {
-                //Get info about the room - "room" "info"
-                if (input.getFirstWord().equalsIgnoreCase("room")) {
-                    sender.sendMessage("Room ID: #" + currentRoom.getRoomID());
-                    return true;
-                }
-                //Get info about the area - "area" "info"
-                if (input.getFirstWord().equalsIgnoreCase("area")) {
-                    Area area = currentRoom.getArea();
-                    sender.sendMessage("Area" + "#" + area.getAreaID() + ": " + currentRoom.getArea().getName());
-                    return true;
-                }
-            }
+        if (commandRoomNameChange(sender, input)) {
+            return true;
         }
-        if (wordCount == 3) {
-            //Create npc
-            if (input.getWordsUpToIndex(1).equalsIgnoreCase("npc create")) {
-                String NPCName = input.getWordAtIndex(2);
-                //Validate name length
-                if (NPCName.length() < 2) {
-                    sender.sendMessage("That's not a very meaningful name.");
-                    return true;
-                }
-                //Create the new NPC
-                NPC npc = new NPC(NPCName);
-                currentRoom.addNPC(npc);
-                sender.sendMessage(npc.getName() + " appears out of thin air!");
-                return true;
-            } //Delete NPC
-            if (input.getWordsUpToIndex(1).equalsIgnoreCase("npc delete")) {
-                String NPCName = words.get(2);
-                ArrayList<NPC> NPCs = currentRoom.getNPCs();
-                for (NPC npc : NPCs) {
-                    //Check for a matching name, and remove if it exists
-                    if (npc.getName().equalsIgnoreCase(NPCName)) {
-                        currentRoom.removeNPC(npc);
-                        sender.sendMessage(npc.getName() + " is no more!");
-                        return true;
-                    }
-                }
-                sender.sendMessage("What's a \"" + NPCName + "\"?");
-                return true;
-            }
+        if (commandRoomDescriptionChange(sender, input)) {
+            return true;
         }
-        if (wordCount == 5) {
-            //Change NPC name
-            if (input.getWordsUpToIndex(2).equalsIgnoreCase("npc modify name")) {
-                String NPCName = words.get(3);
-                String NPCNewName = words.get(4);
-                ArrayList<NPC> NPCs = currentRoom.getNPCs();
-                for (NPC npc : NPCs) {
-                    //Check for a matching name, and change the name if it exists
-                    if (npc.getName().equalsIgnoreCase(NPCName)) {
-                        sender.sendMessage(npc.getName() + " is now " + NPCNewName + ".");
-                        npc.setName(NPCNewName);
-                        return true;
-                    }
-                }
-                sender.sendMessage("I can't find " + NPCName + ".");
-                return false;
-            }
+        if (commandRoomLink(sender, input)) {
+            return true;
+        }
+        if (commandCreateRoom(sender, input)) {
+            return true;
+        }
+        if (commandUnlinkRoom(sender, input)) {
+            return true;
+        }
+        if (commandDeleteRoom(sender, input)) {
+            return true;
+        }
+        if (commandRoomInfo(sender, input)) {
+            return true;
+        }
+        if (commandAreaInfo(sender, input)) {
+            return true;
+        }
+        if (commandNPCCreate(sender, input)) {
+            return true;
+        }
+        if (commandNPCDelete(sender, input)) {
+            return true;
+        }
+        if (commandNPCModifyName(sender, input)) {
+            return true;
         }
         System.out.println(input.getOriginalInput() + input.getWordCount());
+        return false;
+    }
+
+    private boolean commandRoomInfo(Connection sender, ParsedInput input) {
+        //Get info about the room - "room" "info"
+        if (input.getWordCount() == 2 && input.getWordsUpToIndex(1).equalsIgnoreCase("room info")) {
+            sender.sendMessage("Room ID: #" + sender.getPlayer().getCurrentRoom().getRoomID());
+            return true;
+        }
         return false;
     }
 
@@ -243,5 +245,75 @@ public class WorldShaperInterpreter extends Interpreter {
             Room newRoom = new Room(player.getCurrentRoom().getArea(), areaManger);
             player.getCurrentRoom().setRoomInDirection(direction, newRoom);
         }
+    }
+
+    private boolean commandAreaInfo(Connection sender, ParsedInput input) {
+        //Get info about the area - "area" "info"
+        if (input.getWordCount() == 2 && input.getWordsUpToIndex(1).equalsIgnoreCase("area info")) {
+            Area area = sender.getPlayer().getCurrentRoom().getArea();
+            sender.sendMessage("Area" + "#" + area.getAreaID() + ": " + area.getName());
+            return true;
+        }
+        return false;
+    }
+
+    private boolean commandNPCCreate(Connection sender, ParsedInput input) {
+        //Create NPC
+        if (input.getWordCount() == 3 && input.getWordsUpToIndex(1).equalsIgnoreCase("npc create")) {
+            String NPCName = input.getWordAtIndex(2);
+            //Validate name length
+            if (NPCName.length() < 2) {
+                sender.sendMessage("That's not a very meaningful name.");
+                return true;
+            }
+            //Create the new NPC
+            NPC npc = new NPC(NPCName);
+            sender.getPlayer().getCurrentRoom().addNPC(npc);
+            sender.sendMessage(npc.getName() + " appears out of thin air!");
+            return true;
+        }
+        return false;
+    }
+
+    private boolean commandNPCDelete(Connection sender, ParsedInput input) {
+        //Delete NPC
+        if (input.getWordCount() == 3 && input.getWordsUpToIndex(1).equalsIgnoreCase("npc delete")) {
+            ArrayList<String> words = input.getWords();
+            Room currentRoom = sender.getPlayer().getCurrentRoom();
+            String NPCName = words.get(2);
+            ArrayList<NPC> NPCs = currentRoom.getNPCs();
+            for (NPC npc : NPCs) {
+                //Check for a matching name, and remove if it exists
+                if (npc.getName().equalsIgnoreCase(NPCName)) {
+                    currentRoom.removeNPC(npc);
+                    sender.sendMessage(npc.getName() + " is no more!");
+                    return true;
+                }
+            }
+            sender.sendMessage("What's a \"" + NPCName + "\"?");
+            return true;
+        }
+        return false;
+    }
+
+    private boolean commandNPCModifyName(Connection sender, ParsedInput input) {
+        //Change NPC name
+        if (input.getWordCount() == 5 && input.getWordsUpToIndex(2).equalsIgnoreCase("npc modify name")) {
+            ArrayList<String> words = input.getWords();
+            String NPCName = words.get(3);
+            String NPCNewName = words.get(4);
+            ArrayList<NPC> NPCs = sender.getPlayer().getCurrentRoom().getNPCs();
+            for (NPC npc : NPCs) {
+                //Check for a matching name, and change the name if it exists
+                if (npc.getName().equalsIgnoreCase(NPCName)) {
+                    sender.sendMessage(npc.getName() + " is now " + NPCNewName + ".");
+                    npc.setName(NPCNewName);
+                    return true;
+                }
+            }
+            sender.sendMessage("I can't find " + NPCName + ".");
+            return true;
+        }
+        return false;
     }
 }

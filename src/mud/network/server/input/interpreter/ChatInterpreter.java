@@ -19,7 +19,7 @@ import mud.network.server.Connection;
  * @author Japhez
  */
 public class ChatInterpreter extends Interpreter {
-    
+
     private PlayerManager playerManager;
 
     public ChatInterpreter(HashMap<InetAddress, Connection> clientMap, GameMaster master) {
@@ -48,6 +48,24 @@ public class ChatInterpreter extends Interpreter {
      */
     @Override
     public boolean interpret(Connection sender, ParsedInput input) {
+        if (commandTell(sender, input)) {
+            return true;
+        }
+        if (commandSay(sender, input)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks to see if the sender is trying to send a tell to another player,
+     * and sends it if possible.
+     *
+     * @param sender
+     * @param input
+     * @return true if the user was trying to send a tell, else false
+     */
+    private boolean commandTell(Connection sender, ParsedInput input) {
         String firstWord = input.getFirstWord();
         //Check to see if the message is a tell
         if (firstWord.equalsIgnoreCase("tell")) {
@@ -93,7 +111,21 @@ public class ChatInterpreter extends Interpreter {
                     }
                 }
             }
+        } else {
+            return false;
         }
+    }
+
+    /**
+     * Checks to see if the sender is trying to talk within the room, and relays
+     * the message if possible.
+     *
+     * @param sender
+     * @param input
+     * @return true if the user was trying to say something, else false
+     */
+    private boolean commandSay(Connection sender, ParsedInput input) {
+        String firstWord = input.getFirstWord();
         //Check to see if the player is trying to say something to the room
         if (firstWord.equalsIgnoreCase("say")) {
             String senderName = sender.getPlayer().getName();
